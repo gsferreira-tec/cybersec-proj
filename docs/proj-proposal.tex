@@ -1,0 +1,56 @@
+\documentclass[conference, onecolumn, a4paper, 10pt]{IEEEtran}
+
+\usepackage{url}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{xcolor}
+
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+\begin{document}
+\title{Hardening Email Sender Authentication: Reproducing SPF/DKIM/DMARC Misconfiguration Attacks}
+
+% author names and e-mail addresses
+\author{
+\IEEEauthorblockN{Guilherme Ferreira}
+\IEEEauthorblockA{up201706719@fe.up.pt}
+\and
+\IEEEauthorblockN{João Oliveira}
+\IEEEauthorblockA{up202205302@fe.up.pt}
+\and
+\IEEEauthorblockN{Ayrton da Cruz}
+\IEEEauthorblockA{up...@fe.up.pt}
+\and
+\IEEEauthorblockN{Ana Lúcia Ferreira}
+\IEEEauthorblockA{up....@fe.up.pt}
+}
+
+% generate the title area
+\maketitle
+
+\begin{abstract}
+This project focuses on email sender authentication mechanisms (SPF, DKIM, and DMARC) and how real-world misconfigurations enable spoofed messages that appear to originate from trusted domains, despite these mechanisms being deployed. Misconfigured or missing DNS records leave organizations exposed to phishing and impersonation attacks, and are concrete instances of OWASP Security Misconfiguration and Identification and Authentication Failures in the email ecosystem.
+
+Our main goal is to build a controlled lab environment with several test domains and mail servers (e.g., Postfix/Dovecot) using deliberately weak or inconsistent SPF, DKIM, and DMARC policies. We will reproduce a subset of spoofing attacks documented in the literature and in bug-bounty writeups, using tools such as \texttt{swaks}, Espoofer, and custom Python scripts to generate and analyze spoofed messages under different configurations. Network captures and server logs will be used to characterize how various policies affect deliverability and message authentication results.
+
+Based on these experiments, we will propose and evaluate hardening guidelines and simple MTA-side checks that enforce safer interpretations of authentication results and stricter alignment between DNS records and actual senders. The expected outcome is an implementation and demonstration of a proof-of-concept lab that (i) shows successful spoofing under realistic misconfigurations and (ii) demonstrates how our proposed configurations and filters prevent the same attacks, potentially serving as the basis for a SEED-style lab in future editions of the course.
+\end{abstract}
+
+\section{Introduction}
+Email remains a primary vector for phishing and social-engineering attacks, and many of these campaigns succeed by forging messages that appear to come from trusted internal or partner domains. Standards such as SPF, DKIM, and DMARC were designed to authenticate email senders and detect spoofed messages, but in practice they are often deployed with weak or inconsistent policies that still allow successful impersonation.
+
+In this project, we target the concrete problem of sender spoofing enabled by misconfigured SPF/DKIM/DMARC records. Our approach is to reproduce such misconfigurations in a controlled lab environment, demonstrate how an attacker can exploit them to bypass sender authentication, and then design and evaluate practical hardening measures at the DNS and MTA levels. This aligns with the course goal of understanding vulnerabilities, building realistic attack scenarios, and proposing and testing defenses on a concrete service.
+
+\section{Related work}
+Chen et al.\ provide a detailed case study of email sender authentication in the wild, showing how inconsistencies in the way SPF, DKIM, and DMARC are combined across servers and clients enable 18 practical evasion techniques and even the forging of DKIM-signed messages~\cite{chen2020composition}. Their work strongly motivates our focus on composition issues and misconfigurations rather than on the cryptographic primitives themselves.
+
+Operational blogs and deployment guides further document common SPF, DKIM, and DMARC setup mistakes and their impact on spoofing and phishing risk, highlighting how often domains deploy these mechanisms with weak or inconsistent policies~\cite{infraforge_spfdkimdmarc_mistakes,dmarcly_definitive_guide}. On the tooling side, Espoofer is an open-source email spoofing testing tool that systematizes many of the attacks identified in the literature and in practice, and provides a useful starting point for constructing and automating spoofing experiments in a controlled environment~\cite{chenjj_espoofer}. We will also frame our work using the OWASP Top 10:2025 categories A02:2025 Security Misconfiguration and A07:2025 Authentication Failures, since misconfigured or missing sender-authentication records are a concrete example of these broader classes of vulnerabilities in the email ecosystem~\cite{owasp_a02_2025,owasp_a07_2025}.
+
+
+\clearpage
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,OurBibliography}
+\end{document}

@@ -1,0 +1,57 @@
+This is BibTeX, Version 0.99d (TeX Live 2025/dev/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: proj-proposal.aux
+The style file: IEEEtran.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: IEEEabrv.bib
+Database file #2: OurBibliography.bib
+-- IEEEtran.bst version 1.12 (2007/01/11) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+
+Done.
+You've used 6 entries,
+            4024 wiz_defined-function locations,
+            1206 strings with 15397 characters,
+and the built_in function-call counts, 3098 in all, are:
+= -- 256
+> -- 43
+< -- 11
++ -- 24
+- -- 8
+* -- 133
+:= -- 535
+add.period$ -- 12
+call.type$ -- 6
+change.case$ -- 11
+chr.to.int$ -- 30
+cite$ -- 6
+duplicate$ -- 235
+empty$ -- 276
+format.name$ -- 9
+if$ -- 676
+int.to.chr$ -- 0
+int.to.str$ -- 6
+missing$ -- 50
+newline$ -- 43
+num.names$ -- 6
+pop$ -- 127
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 2
+skip$ -- 243
+stack$ -- 0
+substring$ -- 86
+swap$ -- 156
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 5
+type$ -- 6
+warning$ -- 0
+while$ -- 10
+width$ -- 7
+write$ -- 78
