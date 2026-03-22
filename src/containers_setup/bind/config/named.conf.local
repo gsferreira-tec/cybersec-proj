@@ -1,0 +1,9 @@
+zone "attacker.test" { 
+    type master;
+    file "/var/lib/bind/db.attacker.test";
+};
+
+zone "victim.test" {
+    type master;
+    file "/var/lib/bind/db.victim.test";
+};

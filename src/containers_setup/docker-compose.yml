@@ -1,0 +1,78 @@
+version: "3"
+
+services:
+    dns-server:
+        # image: handsonsecurity/seed-ubuntu:large
+        image: ubuntu/bind9:latest
+        container_name: dns-server-10.9.0.5
+        tty: true
+        cap_add:
+                - ALL
+        networks:
+            net-10.9.0.0:
+                ipv4_address: 10.9.0.5
+        #command: bash -c "/usr/sbin/named -g -c /etc/bind/named.conf && tail -f /dev/null"
+        #
+        volumes:
+            - ./bind/config:/etc/bind
+            - ./bind/zones:/var/lib/bind
+
+        restart: always
+                  
+    victim-mail:
+        #image: handsonsecurity/seed-ubuntu:large
+        image: mailserver/docker-mailserver:latest 
+        container_name: victim-mail-10.9.0.6
+        hostname: mail
+        domainname: victim.test
+        environment:
+            - POSTMASTER_ADDRESS=postmaster@victim.test
+            - ENABLE_SPAMASSASSIN=1
+            - ENABLE_CLAMAV=0
+            - ENABLE_FAIL2BAN=0
+
+        tty: true
+        cap_add:
+                - ALL
+        networks:
+            net-10.9.0.0:
+                ipv4_address: 10.9.0.6
+
+        dns:
+          - 10.9.0.5 # IP from attacker's DNS server 
+
+        ports:
+          - "2525:25"   # STMP
+          - "1143:143"  # IMAP
+        # Host ports were changed to avoid conflict
+
+        volumes:
+          - ./maildata:/tmp/docker-mailserver
+        
+        #command: bash -c "/etc/init.d/postfix start && /etc/init.d/dovecot start && tail -f /dev/null"
+
+        restart: always
+
+    attacker-sender: 
+        image: handsonsecurity/seed-ubuntu:large
+        container_name: attacker-sender-10.9.0.7
+        hostname: attacker
+        tty: true
+        cap_add:
+                - ALL
+        networks:
+            net-10.9.0.0:
+              ipv4_address: 10.9.0.7
+
+        volumes:
+          - ./espoofer/:/home/seed/espoofer
+
+        command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null"
+
+networks:
+  net-10.9.0.0:
+      name: net-10.9.0.0
+      ipam:
+          config:
+              - subnet: 10.9.0.0/24
+

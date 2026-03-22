@@ -1,0 +1,20 @@
+$TTL 86400
+@   IN  SOA     ns1.attacker.test. admin.attacker.test. (
+                  2026032201 ; Serial (YYYYMMDDNN)
+                  3600       ; Refresh
+                  900        ; Retry
+                  604800     ; Expire
+                  86400 )    ; Minimum TTL
+
+@   IN  NS      ns1.attacker.test.
+ns1 IN  A       10.9.0.5
+
+; --- SPOOFING INFRASTRUCTURE ---
+; SPF: Tells 10.9.0.7 (the actual attacker) is authorized
+@   IN  TXT     "v=spf1 ip4:10.9.0.7 +all"
+
+; DKIM: The public key used to verify the email signature
+selector._domainkey IN TXT ( "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDNjwdrmp/gcbKLaGQfRZk+LJ6XOWuQXkAOa/lI1En4t4sLuWiKiL6hACqMrsKQ8XfgqN76mmx4CHWn2VqVewFh7QTvshGLywWwrAJZdQ4KTlfR/2EwAlrItndijOfr2tpZRgP0nTY6saktkhQdwrk3U0SZmG7U8L9IPj7ZwPKGvQIDAQAB" )
+
+; DMARC: Tells the receiver to check SPF and DKIM
+_dmarc IN TXT "v=DMARC1; p=none; aspf=r; adkim=r"

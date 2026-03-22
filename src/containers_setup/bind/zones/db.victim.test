@@ -1,0 +1,25 @@
+$TTL 86400
+@   IN  SOA     ns1.victim.test. admin.victim.test. (
+                  2026032201 ; Serial (YYYYMMDDNN)
+                  3600       ; Refresh
+                  900        ; Retry
+                  604800     ; Expire
+                  86400 )    ; Minimum TTL
+
+@   IN  NS      ns1.victim.test.
+ns1 IN  A       10.9.0.5
+
+; --- MAIL INFRASTRUCTURE ---
+; MX: Points to the victim mail server
+@       IN  MX  10  mail.victim.test.
+mail    IN  A       10.9.0.6
+
+; --- INTENTIONAL MISCONFIGURATIONS (for lab purposes) ---
+; SPF: Soft fail (~all) — allows spoofing to pass in many clients
+@   IN  TXT     "v=spf1 mx ~all"
+
+; DKIM: No selector/_domainkey record — signatures cannot be verified
+; (intentionally missing)
+
+; DMARC: Policy set to none — monitoring only, no enforcement
+_dmarc IN TXT   "v=DMARC1; p=none; aspf=r; adkim=r"
