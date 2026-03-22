@@ -1,9 +1,9 @@
-zone "attacker.test" { 
+zone "attacker.test" {
     type master;
-    file "/var/lib/bind/db.attacker.test";
+    file "/etc/bind/db.attacker.test";
 };
 
 zone "victim.test" {
     type master;
-    file "/var/lib/bind/db.victim.test";
+    file "/etc/bind/db.victim.test";
 };

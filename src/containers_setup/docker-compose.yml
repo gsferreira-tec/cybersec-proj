@@ -2,8 +2,8 @@ version: "3"
 
 services:
     dns-server:
-        # image: handsonsecurity/seed-ubuntu:large
-        image: ubuntu/bind9:latest
+        build : ./bind
+        image: dns-server-custom
         container_name: dns-server-10.9.0.5
         tty: true
         cap_add:
@@ -13,9 +13,6 @@ services:
                 ipv4_address: 10.9.0.5
         #command: bash -c "/usr/sbin/named -g -c /etc/bind/named.conf && tail -f /dev/null"
         #
-        volumes:
-            - ./bind/config:/etc/bind
-            - ./bind/zones:/var/lib/bind
 
         restart: always
                   
