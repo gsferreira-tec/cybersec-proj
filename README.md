@@ -22,3 +22,12 @@
 # Tools
 
 - In this section we will list all the tools used in terms of hardware and/or software need for the project.
+
+---
+# Commands
+
+- In either the victim or attack container, one can test the resolution of its domain name, in the DNS server, via the following command:
+  - nslookup mail.attacker.test 10.9.0.5
+- For the victim counterpart:
+  - nslookup mail.victim.test 10.9.0.5
+
