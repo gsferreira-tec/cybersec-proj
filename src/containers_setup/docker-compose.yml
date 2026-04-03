@@ -23,6 +23,8 @@ services:
         hostname: mail
         domainname: victim.test
         environment:
+            - VIRTUAL_DOMAINS=victim.test
+            - VIRTUAL_USERS=alice:pass123:alice@victim.test,bob:123pass:bob@victim.test
             - POSTMASTER_ADDRESS=postmaster@victim.test
             - ENABLE_SPAMASSASSIN=1
             - ENABLE_CLAMAV=0

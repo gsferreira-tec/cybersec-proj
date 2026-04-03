@@ -52,6 +52,9 @@ monitor_network() {
 }
 
 print_logs() {
+  sleep 5
+  echo ""
+  echo ""
   echo "Email Headers"
   cat -n "$EMAIL_FILE" | grep -i -A3 -B1 'MAIL FROM| RCPT'
 }
