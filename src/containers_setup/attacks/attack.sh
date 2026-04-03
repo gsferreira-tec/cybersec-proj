@@ -20,9 +20,9 @@ VICTIM_DOMAIN="10.9.0.5"  # DNS
 
 # These are cvariables with the output file names
 EMAIL_FILE="spf-spoof-attack.log"
-NETWORK_FILE="spf-network.log"
-LOG_FILE="spf-log.log"
-DOMAIN_FILE="spf-dns.log"
+NETWORK_FILE="spf-network-traffic.log"
+#LOG_FILE="spf-log.log"
+#DOMAIN_FILE="spf-dns.log"
 
 # check if the number of args is correct
 if [ $# -ne 3 ]; then
@@ -39,9 +39,10 @@ send_email() {
   --server $MAIL_SERVER_IP --port 25 \
   --header "From: ${sender}" \
   --header "To: ${target}" \
+  --helo attacker.attacker.test \
   --header "Subject: SPF Test" \
   --body $message \
-  --raw 2>&1 /dev/null > tee "$EMAIL_FILE"
+  --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
 }
 
 monitor_network() {
