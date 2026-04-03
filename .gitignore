@@ -9,3 +9,6 @@ docs/*.blg
 docs/*.fdb_latexmk
 docs/*.fls
 docs/*.out
+
+# ignore the output aritfacts from the attacks
+src/containers_setup/attacks/*.log
