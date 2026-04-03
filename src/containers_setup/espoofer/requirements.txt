@@ -1,0 +1,4 @@
+colorama
+simplejson
+argparse
+dnspython
