@@ -1,0 +1,11 @@
+# ignore the python virtual environment
+.venv
+
+# ignore the docs LaTeX artifacts
+docs/*.log
+docs/*.aux
+docs/*.bbl
+docs/*.blg
+docs/*.fdb_latexmk
+docs/*.fls
+docs/*.out

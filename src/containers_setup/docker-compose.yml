@@ -63,6 +63,8 @@ services:
 
         volumes:
           - ./espoofer/:/home/seed/espoofer
+          - ./attacks/:/home/seed/attacks
+          - ./init_setup/:/home/seed/init_setup
 
         command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null"
 
