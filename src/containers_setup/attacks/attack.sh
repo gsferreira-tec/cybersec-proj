@@ -41,7 +41,7 @@ send_email() {
   --header "To: ${target}" \
   --helo attacker.attacker.test \
   --header "Subject: SPF Test" \
-  --body $message \
+  --body "$message" \
   --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
 }
 

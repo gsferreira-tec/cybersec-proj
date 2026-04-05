@@ -1,1 +1,3 @@
 user@victim.test|{SHA512-CRYPT}$6$BTTDHqhp5J0lDIXC$wsiswNoZ0Vw3Sbp6PRzJGl5zZUfsQDeL4ogjj6RvJFpZuoOCkkc2OkSF.z4quvnEOygo2LUOAiWQr6kvlVb9S0
+alice@victim.test|{SHA512-CRYPT}$6$8XxJBw/YpWSaME0Z$4eh.mQmKJlMNSVx58wogbCLsQSdE1xOO6dENd3CMmRC3aWOaOal4H2Se/I10G2WvIb9ZExMvAoupVf.0XuuxE/
+bob@victim.test|{SHA512-CRYPT}$6$ghCA1.1ip/.2HhW3$LDAFAyLZu7lkqPqd.Jz3/GKcCOyzuRxWwflFa59jVrESl/setcsgXtNPTYhewql/mkd83ttsS58NAC14yESN9/
