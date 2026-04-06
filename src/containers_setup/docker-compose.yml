@@ -70,6 +70,22 @@ services:
 
         command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null"
 
+    webmail:
+        image: roundcube/roundcubemail:latest
+        container_name: webmail-10.9.0.8
+        networks:
+            net-10.9.0.0:
+                ipv4_address: 10.9.0.8
+        ports:
+            - "8080:80"    # access via browser at http://localhost:8080
+        environment:
+            - ROUNDCUBEMAIL_DEFAULT_HOST=10.9.0.6      # victim mail server
+            - ROUNDCUBEMAIL_DEFAULT_PORT=143            # IMAP
+            - ROUNDCUBEMAIL_SMTP_SERVER=10.9.0.6       # SMTP
+            - ROUNDCUBEMAIL_SMTP_PORT=25
+        depends_on:
+            - victim-mail
+
 networks:
   net-10.9.0.0:
       name: net-10.9.0.0
