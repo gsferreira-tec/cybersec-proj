@@ -1,0 +1,273 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+
+% ----- Linux Mint-inspired Colors -----
+\definecolor{mintbg}{RGB}{46,52,54}
+\definecolor{mintpanel}{RGB}{56,62,64}
+\definecolor{mintbar}{RGB}{63,70,72}
+\definecolor{mintgreen}{RGB}{135,192,107}
+\definecolor{mintgreenlight}{RGB}{165,214,167}
+\definecolor{textgray}{RGB}{236,239,241}
+\definecolor{codebg}{RGB}{34,39,40}
+\definecolor{codeframe}{RGB}{92,107,95}
+\definecolor{codetext}{RGB}{232,245,233}
+\definecolor{codekeyword}{RGB}{167,214,104}
+\definecolor{codestring}{RGB}{255,204,128}
+\definecolor{codecomment}{RGB}{144,164,174}
+
+% ----- Global Beamer Colors -----
+\setbeamercolor{background canvas}{bg=mintbg}
+\setbeamercolor{normal text}{fg=textgray,bg=mintbg}
+\setbeamercolor{structure}{fg=mintgreen}
+\setbeamercolor{title}{fg=mintgreen,bg=mintbg}
+\setbeamercolor{subtitle}{fg=mintgreenlight,bg=mintbg}
+\setbeamercolor{frametitle}{fg=mintgreen,bg=mintbar}
+\setbeamercolor{titlelike}{fg=mintgreen,bg=mintbg}
+\setbeamercolor{author}{fg=textgray,bg=mintbg}
+\setbeamercolor{institute}{fg=textgray,bg=mintbg}
+\setbeamercolor{date}{fg=mintgreenlight,bg=mintbg}
+\setbeamercolor{section in toc}{fg=mintgreen}
+\setbeamercolor{subsection in toc}{fg=textgray}
+\setbeamercolor{itemize item}{fg=mintgreen}
+\setbeamercolor{itemize subitem}{fg=mintgreenlight}
+\setbeamercolor{itemize subsubitem}{fg=mintgreenlight}
+\setbeamercolor{block title}{fg=mintgreen,bg=mintpanel}
+\setbeamercolor{block body}{fg=textgray,bg=mintpanel}
+\setbeamercolor{palette primary}{fg=mintgreen,bg=mintbar}
+\setbeamercolor{palette secondary}{fg=textgray,bg=mintpanel}
+\setbeamercolor{palette tertiary}{fg=mintgreen,bg=mintbar}
+\setbeamercolor{palette quaternary}{fg=textgray,bg=mintpanel}
+\setbeamercolor{headline}{bg=mintbar,fg=mintgreen}
+\setbeamercolor{footline}{bg=mintbar,fg=textgray}
+\setbeamercolor{separation line}{bg=mintgreen}
+\setbeamercolor{fine separation line}{bg=mintgreen}
+
+% ----- Font Settings -----
+\setbeamerfont{title}{family=\ttfamily,series=\bfseries,size=\Large}
+\setbeamerfont{subtitle}{family=\ttfamily,size=\normalsize}
+\setbeamerfont{frametitle}{family=\ttfamily,series=\bfseries,size=\large}
+\setbeamerfont{titlelike}{family=\ttfamily,series=\bfseries}
+\setbeamerfont{section title}{family=\ttfamily,series=\bfseries}
+\setbeamerfont{author}{family=\ttfamily,size=\small}
+\setbeamerfont{institute}{family=\ttfamily,size=\small}
+\setbeamerfont{date}{family=\ttfamily,size=\small}
+
+% ----- Visible Itemize Markers -----
+\setbeamertemplate{itemize item}{\color{mintgreen}\large\textbullet}
+\setbeamertemplate{itemize subitem}{\color{mintgreenlight}\normalsize\textbullet}
+\setbeamertemplate{itemize subsubitem}{\color{mintgreenlight}\small\textbullet}
+\newcommand{\gitem}{\item[\textcolor{mintgreen}{\large\textbullet}]}
+
+% ----- Terminal-style Frame Titles -----
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip
+  \begin{beamercolorbox}[wd=\paperwidth,ht=3.1ex,dp=1.1ex,leftskip=0.8em,rightskip=0.3em]{frametitle}
+    {\usebeamerfont{frametitle}\textcolor{mintgreen}{>}\hspace{0.4em}\insertframetitle}
+  \end{beamercolorbox}%
+}
+
+% ----- Rounded Madrid-like Title Page -----
+\setbeamertemplate{title page}{%
+  \vfill
+  \begin{center}
+    \begin{beamercolorbox}[wd=0.88\paperwidth,rounded=true,shadow=true,sep=1.51em,left]{block title}
+      {\usebeamerfont{title}\textcolor{mintgreen}{>}\hspace{0.5em}\inserttitle\par}
+      \vspace{0.4em}
+      {\usebeamerfont{subtitle}\insertsubtitle\par}
+    \end{beamercolorbox}
+    \vspace{1.4em}
+    {\usebeamerfont{author}\insertauthor\par}
+    \vspace{0.5em}
+    {\usebeamerfont{institute}\insertinstitute\par}
+    \vspace{0.5em}
+    {\usebeamerfont{date}\insertdate\par}
+  \end{center}
+  \vfill
+}
+
+\AtBeginSection[]{
+\begin{frame}[plain]
+  \vfill
+  \centering
+  {\usebeamerfont{title}\textcolor{mintgreen}{>}\hspace{0.35em}\insertsection\par}
+  \vspace{0.6cm}
+  {\ttfamily\color{textgray}loading module...}
+  \vfill
+\end{frame}
+}
+
+% ----- Packages -----
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{minted}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{enumitem}
+
+% ----- Minted Style -----
+\usemintedstyle{native}
+\setminted{
+  fontsize=\small,
+  bgcolor=codebg,
+  linenos,
+  breaklines,
+  framesep=2mm,
+  tabsize=2,
+  style=native
+}
+
+% ----- Title Page -----
+\title[Hardening Email Sender Authentication]{Hardening Email Sender Authentication: \\ A Lab-Based Evaluation of SPF/DKIM/DMARC Misconfigurations}
+\author[Guilherme, Jo\~ao, Ayrton, Ana]{Guilherme Ferreira \and Jo\~ao Oliveira \and Ayrton da Cruz \and Ana L\'ucia Ferreira}
+\institute[FEUP]{Faculdade de Engenharia -- Universidade do Porto}
+\date{\today}
+
+% ----- Begin Document -----
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+\end{frame}
+
+\begin{frame}{Table of Contents}
+  \tableofcontents
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Why Email Authentication Matters}
+\begin{itemize}
+  \gitem Email remains a primary vector for phishing attacks.
+  \vspace{0.5cm}
+  \gitem SPF, DKIM, and DMARC were designed to mitigate spoofing.
+  \vspace{0.5cm}  
+  \gitem Misconfigurations still allow successful impersonation.
+\end{itemize}
+\end{frame}
+
+\section{Lab Setup}
+\begin{frame}[fragile]{Docker-Compose Architecture}
+\begin{minted}{yaml}
+version: "3"
+services:
+  dns-server:        # BIND
+  victim-mail:       # Postfix/Dovecot
+  attacker-sender:   # Espoofer + custom scripts
+  webmail:           # User interface for the email service
+\end{minted}
+\vfill
+\begin{itemize}
+  \gitem DNS server exposes misconfigured SPF, DKIM, and DMARC records.
+  \vspace{0.5cm}  
+  \gitem Victim mail server runs on 10.9.0.6 with docker-mailserver.
+  \vspace{0.5cm}
+  \gitem Attacker container mounts Espoofer and custom attack scripts.
+\end{itemize}
+\end{frame}
+
+\section{Misconfigurations Explored}
+\begin{frame}{SPF / DKIM / DMARC Misconfigurations}
+\begin{itemize}
+  \gitem SPF: \texttt{v=spf1 a mx \textasciitilde all} versus \texttt{-all}.
+  \vspace{0.5cm}  
+  \gitem DKIM: weak selector, missing key rotation, or absent selector.
+  \vspace{0.5cm}  
+  \gitem DMARC: \texttt{p=none} versus \texttt{p=reject} with reporting.
+\end{itemize}
+\vfill
+\begin{block}{Observation}
+\begin{itemize}
+	\gitem Weak or inconsistent policy combinations can still let spoofed mail reach the inbox.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Attack Execution}
+\begin{frame}[fragile]{Running Espoofer from the Attacker Container}
+\begin{minted}{bash}
+docker exec attacker-sender-10.9.0.7 \
+  /home/seed/espoofer/espoofer \
+  -u attacker@example.com \
+  -t alice@victim.test \
+  -f "Subject: Test" \
+  -m "Hello, this is a spoofed mail."
+\end{minted}
+\vfill
+\begin{block}{Observation}
+\begin{itemize}
+  \gitem The attacker sends a crafted spoofed message toward the victim domain.
+  \vspace{0.4cm}
+  \gitem Misconfigured validation logic determines whether delivery succeeds.
+\end{itemize}
+\end{block}
+\end{frame}
+
+\section{Results \& Observations}
+\begin{frame}{Email Authentication Outcomes}
+\centering
+\begin{tabular}{lccc}
+  \toprule
+  \textbf{Test} & \textbf{SPF} & \textbf{DKIM} & \textbf{DMARC} \\
+  \midrule
+  Baseline (correct config) & Pass & Pass & Pass \\
+  Soft-fail SPF             & Pass & Pass & Pass \\
+  DKIM selector missing     & Pass & Fail & Pass \\
+  DMARC \texttt{p=none}     & Pass & Pass & Pass \\
+  \bottomrule
+\end{tabular}
+\vfill
+\begin{itemize}
+  \gitem DKIM misconfiguration is the most relevant vector for successful spoofing.
+  \vspace{0.4cm}
+  \gitem DMARC with \texttt{p=none} gives visibility but no enforcement.
+\end{itemize}
+\end{frame}
+
+\section{Hardening Recommendations}
+\begin{frame}{DNS-Level Fixes}
+\begin{itemize}
+  \gitem Use \texttt{-all} in SPF to enforce a hard fail.
+  \vspace{0.5cm}
+  \gitem Publish a valid DKIM selector and rotate keys regularly.
+  \vspace{0.5cm}  
+  \gitem Publish DMARC with \texttt{p=reject} or \texttt{p=quarantine}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{MTA-Level Fixes}
+\begin{itemize}
+  \gitem Enforce SPF checks on inbound connections.
+  \vspace{0.5cm}
+  \gitem Reject mail that fails DKIM verification.
+  \vspace{0.5cm}
+  \gitem Reject mail that violates DMARC policy.
+\end{itemize}
+\end{frame}
+
+\section{Next Steps}
+\begin{frame}{Future Work}
+\begin{itemize}
+  \gitem Automate misconfiguration detection in the lab.
+  \vspace{0.5cm}
+  \gitem Expand the attack set with additional spoofing scenarios.
+  \vspace{0.5cm}s
+  \gitem Publish a reproducible Docker image for the environment.
+\end{itemize}
+\end{frame}
+
+\section{References}
+\begin{frame}[allowframebreaks]{References}
+	\nocite{*}
+	\bibliographystyle{IEEEtran}
+	\bibliography{references}
+\end{frame}
+
+\end{document}
