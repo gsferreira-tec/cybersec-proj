@@ -25,19 +25,20 @@ NETWORK_FILE="spf-network-traffic.log"
 #DOMAIN_FILE="spf-dns.log"
 
 # check if the number of args is correct
-if [ $# -ne 3 ]; then
-    echo "Usage: $0 <sender-email> <destination-email> <message>"
+if [ $# -ne 4 ]; then
+    echo "Usage: $0 <sender-email> <destination-email> <message> <sender-faker>"
     exit 1
 fi
 
 sender=$1
 target=$2
 message=$3
+sender_fake=$4
 
 send_email() {
     swaks --from $sender --to $target \
   --server $MAIL_SERVER_IP --port 25 \
-  --header "From: ${sender}" \
+  --header "From: ${sender_fake}" \
   --header "To: ${target}" \
   --helo attacker.attacker.test \
   --header "Subject: SPF Test" \
