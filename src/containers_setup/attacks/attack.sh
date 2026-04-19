@@ -63,18 +63,10 @@ elif [ "$mode" = "dmarc" ]; then
     --header "From: $sender_fake" \
     --header "To: $target" \
     --helo attacker.attacker.test \
-    --header "Subject: DMARC Total Failure Test" \
+    --header "Subject: DMARC Test" \
     --body "$message" \
     --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=selector; h=from:to:subject; bh=bad; b=bad" \
     2>&1 | tee "$EMAIL_FILE"
-
-  swaks --from $sender --to $target \
-  --server $MAIL_SERVER_IP --port 25 \
-  --header \
-  --helo \
-  --header \
-  --body \
-  --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
 
 else
   echo
