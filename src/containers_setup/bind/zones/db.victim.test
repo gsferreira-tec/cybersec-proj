@@ -16,7 +16,7 @@ mail    IN  A       10.9.0.6
 
 ; --- INTENTIONAL MISCONFIGURATIONS (for lab purposes) ---
 ; SPF: Soft fail (~all) — allows spoofing to pass in many clients
-@   IN  TXT     "v=spf1 mx ~all"
+;@   IN  TXT     "v=spf1 mx ~all"
 
 ; DKIM: No selector/_domainkey record — signatures cannot be verified
 ; (intentionally missing)

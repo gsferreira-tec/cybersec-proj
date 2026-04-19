@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# updating the ubuntu system in the container and installing relvant tools like swaks
+# this is mean to be run in the attacker container
+# updating the ubuntu system in the attacker container and installing relvant tools like swaks and espoofer
 echo "[*] Updating the System..."
 echo ""
 sleep 3
@@ -35,4 +36,3 @@ sleep 3
 echo ""
 echo ""
 echo "[*] Initial setup completed!"
-

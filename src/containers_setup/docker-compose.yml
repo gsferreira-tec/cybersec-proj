@@ -23,8 +23,6 @@ services:
         hostname: mail
         domainname: victim.test
         environment:
-            - VIRTUAL_DOMAINS=victim.test
-            - VIRTUAL_USERS=alice:pass123:alice@victim.test,bob:123pass:bob@victim.test
             - POSTMASTER_ADDRESS=postmaster@victim.test
             - ENABLE_SPAMASSASSIN=1
             - ENABLE_CLAMAV=0
@@ -66,9 +64,9 @@ services:
         volumes:
           - ./espoofer/:/home/seed/espoofer
           - ./attacks/:/home/seed/attacks
-          - ./init_setup/:/home/seed/init_setup
+          - ./init-setup/:/home/seed/init-setup
 
-        command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null"
+        command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null && /home/seed/init-setup/RUNME-1ST.sh"
 
     webmail:
         image: roundcube/roundcubemail:latest
