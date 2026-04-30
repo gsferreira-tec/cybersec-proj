@@ -1,4 +1,4 @@
-# cybersec-proj
+# Seed Labs - "Email Sender Authentication Miscofiguration (SPF/DKIM/DMARC)"
 
 - This repository contains the documentaition as well as the implementation of a CyberSecurity project developed during the duration of a Cyber Security course from the Masters in Electronics Engineering @ FEUP.
 
