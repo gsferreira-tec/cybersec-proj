@@ -45,8 +45,10 @@ services:
 
         volumes:
           - ./maildata:/tmp/docker-mailserver
+          - ./ml-detector:/home/ml-detector
         
         #command: bash -c "/etc/init.d/postfix start && /etc/init.d/dovecot start && tail -f /dev/null"
+
 
         restart: always
 
