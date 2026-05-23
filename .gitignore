@@ -13,3 +13,6 @@ docs/*.out
 # ignore the output aritfacts from the attacks
 src/containers_setup/attacks/*.log
 src/container_setup/attacks/tee
+
+# ignore the python artifacts from ml_detector and espoofer
+*.pyc
