@@ -1,6 +1,21 @@
 version: "3"
 
 services:
+    #dns-server:
+    #    build : ./bind
+    #    image: dns-server-custom
+    #    container_name: dns-server-10.9.0.5
+    #    tty: true
+    #    cap_add:
+    #            - ALL
+    #    networks:
+    #        net-10.9.0.0:
+    #            ipv4_address: 10.9.0.5
+    #    volumes:
+    #      - ./bind/zones/db.victim.test:/etc/bind/db.victim.test:ro
+    #      - ./bind/zones/db.attacker.test:/etc/bind/db.attacker.test:ro
+    #    restart: always
+    
     dns-server:
         build : ./bind
         image: dns-server-custom
@@ -11,9 +26,6 @@ services:
         networks:
             net-10.9.0.0:
                 ipv4_address: 10.9.0.5
-        #command: bash -c "/usr/sbin/named -g -c /etc/bind/named.conf && tail -f /dev/null"
-        #
-
         restart: always
                   
     victim-mail:

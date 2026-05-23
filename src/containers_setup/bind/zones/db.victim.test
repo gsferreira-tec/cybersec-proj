@@ -1,6 +1,6 @@
-$TTL 86400
+$TTL 60
 @   IN  SOA     ns1.victim.test. admin.victim.test. (
-                  2026032202 ; Serial (YYYYMMDDNN)
+                  2026052303 ; Serial (YYYYMMDDNN)
                   3600       ; Refresh
                   900        ; Retry
                   604800     ; Expire
@@ -10,17 +10,28 @@ $TTL 86400
 ns1 IN  A       10.9.0.5
 
 ; --- MAIL INFRASTRUCTURE ---
-; MX: Points to the victim mail server
 @       IN  MX  10  mail.victim.test.
 mail    IN  A       10.9.0.6
 *       IN  A       10.9.0.6
 
 ; --- INTENTIONAL MISCONFIGURATIONS (for lab purposes) ---
-; SPF: Soft fail (~all) — allows spoofing to pass in many clients
-;@       IN  TXT     "v=spf1 mx ~all"
 
-; DKIM: No selector/_domainkey record — signatures cannot be verified
-; (intentionally missing)
+; === TEST MODE: SPF — uncomment ONE ===
+; (none active)                                          ; no SPF record published
+;@      IN  TXT     "v=spf1 mx ~all"                     ; soft fail
+;@      IN  TXT     "v=spf1 mx -all"                     ; hard fail
+;@      IN  TXT     "v=spf1 +all"                        ; INSECURE — allows anyone (demo only)
 
-; DMARC: Policy set to none — monitoring only, no enforcement
-_dmarc IN TXT   "v=DMARC1; p=none; aspf=r; adkim=r"
+; === TEST MODE: DKIM — uncomment ONE ===
+; (none active — no _domainkey record, signatures cannot be verified)
+mail._domainkey IN TXT ( "v=DKIM1; h=sha256; k=rsa; "
+    "p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA059zD3d0ILQl44l8phURf6ZYYehEHdBZZWhcFtifuqrQkYBYLkQDi1lkTJgsz9BQkhvJ8MyPitBDG0uhRMJ8TG+ykJTj3NuygTYbwRCXiPwMWH+vnopZZfopsVzv38hL23rs919UNgaQ6fFdZAHAJlxFP4VnDwc9HANKlh/lVaZSWVaIRLo0ZJbaLMvTmRtZosysdcjgjwF6B9"
+    "qW/4AY+6AsCVSk98xCC2X/5Hz7DPoyvjLUklormB93lNasvtO1O4L89jgYCGVDVYK6/95C+7F/augNqoId2EwC4Fc3ElbiZpVrW7Hm4Y9tqYTPNl9zq5mFgZBvTAD93lgMlA8YVQIDAQAB" )   ; normal — matches private key in docker-mailserver
+;mail._domainkey IN TXT ( "v=DKIM1; k=rsa; t=y; p=..." )    ; testing flag (t=y)
+;mail._domainkey IN TXT ( "v=DKIM1; k=rsa; p=" )            ; revoked key
+
+; === TEST MODE: DMARC — uncomment ONE ===
+_dmarc  IN TXT  "v=DMARC1; p=none;       aspf=r; adkim=r"
+;_dmarc IN TXT  "v=DMARC1; p=quarantine; pct=50;  aspf=r; adkim=r"
+;_dmarc IN TXT  "v=DMARC1; p=quarantine; pct=100; aspf=s; adkim=s"
+;_dmarc IN TXT  "v=DMARC1; p=reject;     aspf=s; adkim=s; sp=reject"
