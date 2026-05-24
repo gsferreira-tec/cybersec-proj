@@ -1,12 +1,14 @@
 $TTL 60
 @   IN  SOA     ns1.attacker.test. admin.attacker.test. (
-                  2026052301 ; Serial (YYYYMMDDNN)
+                  2026052303 ; Serial (YYYYMMDDNN)
                   3600       ; Refresh
                   900        ; Retry
                   604800     ; Expire
                   86400 )    ; Minimum TTL
 
 @    IN  NS      ns1.attacker.test.
+@    IN  MX  10  mail.attacker.test.
+@    IN  A 	 10.9.0.7
 ns1  IN  A       10.9.0.5
 mail IN  A       10.9.0.7
 *    IN  A       10.9.0.7
