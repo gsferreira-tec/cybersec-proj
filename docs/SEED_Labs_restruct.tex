@@ -982,6 +982,7 @@ you train.
 \begin{notebox}
 \textbf{Lab Scope} This task is a bit outside of the scope of this lab but this is the mitigation mechanism chosen to detect spoofed emails and this protect clients.
 The classifiers (\texttt{RandomForest} and \texttt{SVM}) are alredy implemented and all that needs to be done in this task is to enter the victim container with an interactive shell and run the \texttt{RUNME-1st.sh} script to install the necessary python dependencies. After that run the \texttt{detector.py} script to see the email classifications.
+This being said you are still encouraged to come up with your own detection model.
 \end{notebox}
 
 \subsection{Task 3.3 --- Single vs Multi-Layer Bypass Evaluation}
@@ -1044,37 +1045,122 @@ record from soft-fail to hard-fail:
 \end{minted}
 \end{listing}
 
-Reload the DNS server and re-run the SPF bypass attack from Task~1.2.
-
-\paragraph{Questions.}
-\begin{enumerate}[noitemsep]
-  \item Does the spoofed email still reach Bob's inbox after the SPF
-        change?
-  \item What \texttt{Received-SPF} header value do you now observe?
-  \item Does the envelope/header mismatch attack (envelope sender from
-        \texttt{attacker.test}, header \texttt{From:} from
-        \texttt{victim.test}) still succeed against \texttt{-all}? Why
-        or why not?
-\end{enumerate}
-
-\subsection{Task 4.2 --- Publishing a DKIM Key}
-
-If you did not already keep the key pair from Task~1.3, regenerate it
-and publish the public key:
+Bump the zone serial and reload BIND, then verify the new record is
+published:
 
 \begin{listing}[H]
 \begin{minted}{text}
-# Generate key pair (on the attacker container or host)
+$ docker exec dns-server-10.9.0.5 rndc reload
+(attacker)$ dig +short TXT victim.test @10.9.0.5
+# expect: "v=spf1 mx -all"
+\end{minted}
+\end{listing}
+
+\paragraph{Two attack variants.}
+To understand precisely what hard-fail SPF buys you, run \emph{two}
+attacks against the hardened zone and compare results.
+
+\paragraph{Variant A --- Envelope = \texttt{attacker.test}, header
+\texttt{From:} = \texttt{victim.test}.}
+This is the Task~1.2 attack, unchanged. The attacker uses their own
+SPF-authorised domain in the envelope while forging the visible
+\texttt{From:} header.
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ swaks \
+  --from attacker@attacker.test \
+  --to bob@victim.test \
+  --server 10.9.0.6 --port 25 \
+  --helo mail.attacker.test \
+  --header "From: CEO <ceo@victim.test>" \
+  --header "Subject: Variant A --- envelope from attacker.test" \
+  --body "Hi Bob, hard-fail SPF on victim.test has no effect on this attack."
+\end{minted}
+\end{listing}
+
+\paragraph{Variant B --- Envelope = \texttt{victim.test}, header
+\texttt{From:} = \texttt{victim.test}.}
+This is the naive attack where the attacker also claims
+\texttt{victim.test} in the SMTP envelope. It is what hard-fail SPF is
+actually designed to stop.
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ swaks \
+  --from ceo@victim.test \
+  --to bob@victim.test \
+  --server 10.9.0.6 --port 25 \
+  --helo mail.attacker.test \
+  --header "From: CEO <ceo@victim.test>" \
+  --header "Subject: Variant B --- envelope from victim.test" \
+  --body "Hi Bob, this envelope claims victim.test from an unauthorised IP."
+\end{minted}
+\end{listing}
+
+For each variant, retrieve the message (if it was delivered) and inspect
+the \texttt{Received-SPF} and \texttt{Authentication-Results} headers,
+or, if the message was rejected at SMTP, capture the rejection code
+from the \texttt{swaks} output.
+
+\begin{infobox}
+\textbf{Predicted results.}
+Variant~A: \texttt{spf=pass} (for \texttt{attacker.test}), message
+delivered.
+Variant~B: \texttt{spf=fail} under \texttt{-all}, message rejected at
+SMTP (compare to \texttt{spf=softfail} and delivery under
+\texttt{\textasciitilde all}).
+\end{infobox}
+
+\paragraph{Questions.}
+\begin{enumerate}[noitemsep]
+  \item For each variant, what domain does SPF actually authenticate
+        against? Look at the \texttt{Received-SPF} header (or the
+        rejection reason) to confirm.
+  \item Why does hard-fail SPF on \texttt{victim.test} have no effect
+        on Variant~A, no matter how strict the qualifier?
+  \item Why does it block Variant~B?
+  \item State, in one sentence, the structural limitation of SPF that
+        Variant~A exploits.
+  \item What protocol-level mechanism would be required to block
+        Variant~A? (You will deploy it in Tasks~4.2 and~4.3.)
+\end{enumerate}
+
+\begin{notebox}
+\textbf{Key takeaway.} Tightening SPF from soft-fail to hard-fail closes
+the door on attackers who claim your domain in the envelope, but it
+does \emph{nothing} against attackers who use a different envelope
+domain while forging the visible \texttt{From:}. SPF is by design
+blind to the header \texttt{From:}; closing that gap requires DMARC
+alignment, which you will configure in Task~4.3.
+\end{notebox}
+
+\subsection{Task 4.2 --- Publishing a DKIM Key}
+
+Hard-fail SPF (Task~4.1) closes the naive envelope attack but leaves
+the envelope/header mismatch attack untouched. The next layer of
+defence is DKIM: by signing legitimate outbound mail with a private
+key whose public counterpart is published in DNS, the victim domain
+gives receivers a way to cryptographically verify that a message
+actually originated from the claimed sender's infrastructure.
+
+\paragraph{Step 1 --- Generate the key pair.}
+If you did not already keep the key pair from Task~1.3, regenerate it
+on the attacker container or host:
+
+\begin{listing}[H]
+\begin{minted}{text}
 $ openssl genrsa -out dkim_private.pem 2048
 $ openssl rsa -in dkim_private.pem -pubout -out dkim_public.pem
 
-# Extract the single-line base64 public key (no headers)
+# Extract the single-line base64 public key (no PEM headers)
 $ grep -v '^-' dkim_public.pem | tr -d '\n'
 \end{minted}
 \end{listing}
 
-Add the following record to \texttt{db.victim.test}
-(replace \texttt{<PUBKEY>} with the output above):
+\paragraph{Step 2 --- Publish the DKIM selector.}
+Add the following record to \texttt{db.victim.test} (replace
+\texttt{<PUBKEY>} with the base64 string from Step~1):
 
 \begin{listing}[H]
 \begin{minted}{text}
@@ -1082,20 +1168,121 @@ default._domainkey IN TXT "v=DKIM1; k=rsa; p=<PUBKEY>"
 \end{minted}
 \end{listing}
 
-Configure the victim mail server (Postfix + OpenDKIM) to sign outgoing
-mail with the matching private key, then verify that a legitimate email
-now carries a valid \texttt{DKIM-Signature} header and yields
-\texttt{dkim=pass} on receipt.
+Bump the zone serial, reload BIND, and verify:
+
+\begin{listing}[H]
+\begin{minted}{text}
+$ docker exec dns-server-10.9.0.5 rndc reload
+(attacker)$ dig +short TXT default._domainkey.victim.test @10.9.0.5
+# expect: "v=DKIM1; k=rsa; p=MIIBIj..."
+\end{minted}
+\end{listing}
+
+\paragraph{Step 3 --- Configure the victim MTA to sign outbound mail.}
+Configure Postfix and OpenDKIM on the victim mail server to sign
+outgoing messages from \texttt{victim.test} with the private key from
+Step~1, using the selector \texttt{default}. The specific OpenDKIM
+configuration files (\texttt{KeyTable}, \texttt{SigningTable},
+\texttt{TrustedHosts}) are documented in the project
+\texttt{README}.
+
+Send a legitimate test message from the webmail UI as
+\texttt{alice@victim.test} to \texttt{bob@victim.test}, open Bob's
+inbox, and confirm that the message now carries a valid
+\texttt{DKIM-Signature:} header and that
+\texttt{Authentication-Results} reports \texttt{dkim=pass header.d=victim.test}.
+If you instead see \texttt{dkim=none} or \texttt{dkim=permerror} on
+this \emph{legitimate} test, the MTA is not signing correctly --- fix
+this before proceeding, otherwise every subsequent observation is
+meaningless.
+
+\paragraph{Step 4 --- Re-run the attacks and observe the results.}
+The point of DKIM is to make tampered or unsigned mail
+\emph{detectable}. To see what DKIM does (and does not) catch, re-run
+two attack families against the now-DKIM-signing victim domain:
+
+\paragraph{Attack 1 --- Single-protocol bypass with \texttt{swaks}
+(from Task~1.2 / 4.1, Variant~A).}
+The envelope/header mismatch attack, unchanged:
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ swaks \
+  --from attacker@attacker.test \
+  --to bob@victim.test \
+  --server 10.9.0.6 --port 25 \
+  --helo mail.attacker.test \
+  --header "From: CEO <ceo@victim.test>" \
+  --header "Subject: Post-DKIM swaks test" \
+  --body "Same attack as Task 1.2, now against a DKIM-publishing victim."
+\end{minted}
+\end{listing}
+
+\paragraph{Attack 2 --- Multi-layer bypass with \texttt{espoofer}
+(from Task~2.3).}
+Re-run at least three of the \texttt{espoofer} server-mode cases that
+succeeded in Task~2.3 (for example \texttt{server\_a8},
+\texttt{server\_a11}, \texttt{server\_a14}):
+
+\begin{listing}[H]
+\begin{minted}{text}
+(attacker)$ cd /home/seed/espoofer
+(attacker)$ python3 espoofer.py -id server_a8
+(attacker)$ python3 espoofer.py -id server_a11
+(attacker)$ python3 espoofer.py -id server_a14
+\end{minted}
+\end{listing}
+
+For each delivered message, capture the \texttt{Authentication-Results}
+header and record the \texttt{spf=}, \texttt{dkim=}, and \texttt{dmarc=}
+verdicts side by side with the corresponding results from Tasks~1.2
+and~2.3.
+
+\begin{infobox}
+\textbf{Predicted results.}
+\textit{Attack 1 (swaks):} \texttt{dkim=none} --- the attacker did not
+include any \texttt{DKIM-Signature} header, and DKIM does not require
+one. Message still delivered, because nothing yet enforces
+``unsigned mail from \texttt{victim.test} is suspicious.''
+\\[2pt]
+\textit{Attack 2 (espoofer):} most cases now show
+\texttt{dkim=fail} or \texttt{dkim=none}, but the message is still
+delivered. Some composition cases (e.g.\ multiple-\texttt{From}
+attacks) may still produce \texttt{dkim=pass} for \texttt{attacker.test}
+because the receiver verified the attacker's signature against the
+``wrong'' \texttt{From} header.
+\end{infobox}
 
 \paragraph{Questions.}
 \begin{enumerate}[noitemsep]
-  \item After publishing the DKIM key, which \texttt{espoofer} cases
-        from Task~2 are now blocked? Are any still effective? Explain
-        why.
-  \item Is publishing a DKIM key, by itself, enough to stop a
-        determined attacker? Justify your answer with reference to the
-        composition attacks you saw in Task~2.
+  \item Compare the \texttt{Authentication-Results} headers before and
+        after publishing the DKIM key, for both Attack~1 and Attack~2.
+        Tabulate the \texttt{spf=}, \texttt{dkim=}, and \texttt{dmarc=}
+        verdicts for each scenario.
+  \item Why is Attack~1 (\texttt{swaks}) not blocked by publishing a
+        DKIM key, even though \texttt{victim.test} now has a working
+        signing infrastructure? In particular, what header is the
+        attacker not required to include?
+  \item For each \texttt{espoofer} case you re-ran, classify it as
+        ``blocked,'' ``detected but still delivered,'' or ``undetected
+        and delivered.'' Which composition attacks (if any) still
+        produce \texttt{dkim=pass} against the hardened domain, and
+        why?
+  \item State the structural limitation of DKIM that the surviving
+        attacks exploit. What additional mechanism would be required
+        to turn \texttt{dkim=fail} (or \texttt{dkim=none} on a domain
+        that should be signing) into a delivery decision rather than an
+        annotation?
 \end{enumerate}
+
+\begin{notebox}
+\textbf{Key takeaway.} Publishing a DKIM key gives receivers a way to
+\emph{verify} signatures but, on its own, does not stop a single
+message from being delivered. A missing or broken signature is just an
+annotation in \texttt{Authentication-Results} --- not a rejection. The
+mechanism that turns these annotations into enforcement is DMARC,
+which you will configure in Task~4.3.
+\end{notebox}
 
 \subsection{Task 4.3 --- DMARC Policy Enforcement}
 
