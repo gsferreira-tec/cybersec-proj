@@ -55,7 +55,7 @@ elif [ "$mode" = "dkim" ]; then
     --header "Subject: DKIM Test" \
     --body "$message" \
     --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=selector; h=from:to:subject; bh=invalidhash; b=invaliddata" \
-    --raw > /dev/null 2>&1 | tee "$EMAIL_FILE"
+    --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
     
 elif [ "$mode" = "dmarc" ]; then
   swaks --from "$sender" --to "$target" \
@@ -66,7 +66,7 @@ elif [ "$mode" = "dmarc" ]; then
     --header "Subject: DMARC Test" \
     --body "$message" \
     --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=selector; h=from:to:subject; bh=bad; b=bad" \
-    2>&1 | tee "$EMAIL_FILE"
+    --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
 
 else
   echo

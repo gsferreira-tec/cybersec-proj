@@ -3,6 +3,30 @@
 BASE_DIR="$(dirname "$(realpath "$0")")/../attacks"
 ATTACK_SH="$BASE_DIR/attack.sh"
 
+policy() {
+    echo "-------------------------------------------------------"
+    echo " *** Checking for authentication configurations... ***"
+    echo "-------------------------------------------------------"
+    sleep 1
+    echo
+    echo "-------------------------------------------------------"
+    echo " *** Checking for SPF Policy... ***"
+    echo "-------------------------------------------------------"
+    dig TXT victim.test @10.9.0.5
+    sleep 2
+    echo
+    echo "-------------------------------------------------------"
+    echo " *** Checking for DKIM Policy... ***"
+    echo "-------------------------------------------------------"
+    dig TXT mail._domainkey.victim.test @10.9.0.5
+    sleep 2
+    echo
+    echo "-------------------------------------------------------"
+    echo " *** Checking for DMARC Policy... ***"
+    echo "-------------------------------------------------------"
+    dig TXT _dmarc.victim.test @10.9.0.5
+}
+
 fetch_args() {
     read -e -p "Target Email: " target
     read -e -p "Real Sender [attacker email]: " sender
@@ -52,6 +76,9 @@ while true; do
     history -s "$input"
     read -r cmd args <<< "$input"
     case "$cmd" in
+        policy)
+            policy
+            ;;
         spf)
             spf_attack
             ;;
@@ -80,6 +107,7 @@ while true; do
             echo
             echo "Other commands available:"
             echo
+            echo "   policy: check the current policies for SPF, DKIM and DMARC"
             echo "   clear: clear the terminal"
             echo "   exit: exit SpoofMaster"
             echo
