@@ -875,7 +875,7 @@ every header field:
   -mfrom attacker@attacker.test \
   -rcptto bob@victim.test \
   -ip 10.9.0.6 -port 25 \
-  -data "From: Alice <alice@victim.test>\r\nSubject: Spoofing\r\n\r\nBody here."
+  -data $'From: Alice <alice@victim.test>\r\nSubject: Spoofing\r\n\r\nBody here.'
 \end{minted}
 \end{listing}
 
