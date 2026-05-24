@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-# This script is meant to be run from the interactive shell inside the attacker container in the  SEED Labs Docker network setup
+# This script is meant to be run from the interactive shell inside the attacker container in the SEED Labs Docker network setup
 
 # This particular attack is meant to show what an SPF bypass attack looks like
 
@@ -33,8 +33,6 @@ sender_fake=$5
 send_email() {
 
 local mode=$1
-
-#monitor_network
 
 if [ "$mode" = "spf" ]; then
     swaks --from $sender --to $target \
@@ -70,18 +68,12 @@ elif [ "$mode" = "dmarc" ]; then
 
 else
   echo
-  echo "The argument provided for the attack mode is not available or may have a typo. Fix this and rerun the command!"
+  echo "The argument provided for the attack mode is not available or may have a typo."
   echo
   help
   exit 1
 fi
 
-}
-
-monitor_network() {
-  tcpdump -i eth0 -w "$NETWORK_FILE" -c 1 -w 2>/dev/null &
-  sleep 0.5
-  tcpdump -r "$NETWORK_FILE" 2>/dev/null | tee "$NETWORK_FILE"
 }
 
 print_logs() {
