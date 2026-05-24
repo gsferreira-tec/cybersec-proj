@@ -975,9 +975,14 @@ print(classification_report(y_test, y_pred,
 print(confusion_matrix(y_test, y_pred))
 \end{minted}
 \end{listing}
-
+\vspace{-20pt}
 Report precision, recall, F1-score, and accuracy for each classifier
 you train.
+\vspace{5pt}
+\begin{notebox}
+\textbf{Lab Scope} This task is a bit outside of the scope of this lab but this is the mitigation mechanism chosen to detect spoofed emails and this protect clients.
+The classifiers (\texttt{RandomForest} and \texttt{SVM}) are alredy implemented and all that needs to be done in this task is to enter the victim container with an interactive shell and run the \texttt{RUNME-1st.sh} script to install the necessary python dependencies. After that run the \texttt{detector.py} script to see the email classifications.
+\end{notebox}
 
 \subsection{Task 3.3 --- Single vs Multi-Layer Bypass Evaluation}
 
