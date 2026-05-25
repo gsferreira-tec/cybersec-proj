@@ -3,6 +3,27 @@
 BASE_DIR="$(dirname "$(realpath "$0")")/../attacks"
 ATTACK_SH="$BASE_DIR/attack.sh"
 
+init_check() {
+    echo "Checking the initial expected results for the domain resolutions/configuration..."
+    dig +short MX  attacker.test                  @10.9.0.5
+    sleep 1
+    dig +short A   attacker.test                  @10.9.0.5
+    sleep 1
+    dig +short TXT attacker.test                  @10.9.0.5
+    sleep 1
+    dig +short TXT selector._domainkey.attacker.test @10.9.0.5
+    sleep 1
+    dig +short MX  victim.test                    @10.9.0.5
+    sleep 1
+    dig +short A   victim.test                    @10.9.0.5
+    sleep 1
+    dig +short TXT victim.test                    @10.9.0.5
+    sleep 1
+    dig +short TXT mail._domainkey.victim.test    @10.9.0.5
+    sleep 1
+    dig +short TXT _dmarc.victim.test             @10.9.0.5
+}
+
 policy() {
     echo "-------------------------------------------------------"
     echo " *** Checking for authentication configurations... ***"
@@ -76,6 +97,9 @@ while true; do
     history -s "$input"
     read -r cmd args <<< "$input"
     case "$cmd" in
+        init_check)
+            init_check
+            ;;
         policy)
             policy
             ;;
@@ -107,6 +131,7 @@ while true; do
             echo
             echo "Other commands available:"
             echo
+            echo "   init_check: check for the initial resulutions/configs - run at the start of the lab"
             echo "   policy: check the current policies for SPF, DKIM and DMARC"
             echo "   clear: clear the terminal"
             echo "   exit: exit SpoofMaster"

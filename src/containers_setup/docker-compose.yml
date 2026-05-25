@@ -1,5 +1,3 @@
-version: "3"
-
 services:
     #dns-server:
     #    build : ./bind
@@ -30,7 +28,8 @@ services:
                   
     victim-mail:
         #image: handsonsecurity/seed-ubuntu:large
-        image: mailserver/docker-mailserver:latest 
+        image: mailserver/docker-mailserver:latest
+        # image: mailserver/docker-mailserver:13.3.1
         container_name: victim-mail-10.9.0.6
         hostname: mail
         domainname: victim.test
@@ -49,7 +48,7 @@ services:
 
         dns:
           - 10.9.0.5 # IP from attacker's DNS server 
-
+        # dns_search: [] # test to solve dkim troubles...
         ports:
           - "2525:25"   # STMP
           - "1143:143"  # IMAP
@@ -58,6 +57,9 @@ services:
         volumes:
           - ./maildata:/tmp/docker-mailserver
           - ./ml-detector:/home/ml-detector
+          - ./resolv.conf:/etc/resolv.conf:ro
+          - ./unbound.conf:/etc/opendkim/unbound.conf:ro
+          - ./opendkim.conf:/etc/opendkim.conf:ro
         
         #command: bash -c "/etc/init.d/postfix start && /etc/init.d/dovecot start && tail -f /dev/null"
 
@@ -80,7 +82,7 @@ services:
           - ./attacks/:/home/seed/attacks
           - ./init-setup/:/home/seed/init-setup
 
-        command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null && /home/seed/init-setup/RUNME-1ST.sh"
+        command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null"
 
     webmail:
         image: roundcube/roundcubemail:latest
@@ -101,6 +103,7 @@ services:
 networks:
   net-10.9.0.0:
       name: net-10.9.0.0
+      # driver: bridge # test to solve dkim key troubles...
       ipam:
           config:
               - subnet: 10.9.0.0/24

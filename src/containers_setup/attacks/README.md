@@ -13,3 +13,6 @@
 
 - Alternative the `Spoofmaster` tool can be used which is essentially a CLI to run the attacks from `attack.sh`.
   - To start the tool run the script `spoofmaster-cli.sh`.
+  - It also allow checking the currently applied policies for the authentication methods configured in the 
+  `db.victim.test` file by running the command `policy`.
+  - For additional information run the command `help`.
