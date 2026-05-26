@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 357 504.9"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   sodipodi:docname="workflow.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#a5a5a5"
+     bordercolor="#00e824"
+     borderopacity="0.24705882"
+     inkscape:showpageshadow="false"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="false"
+     inkscape:deskcolor="#000000"
+     inkscape:document-units="mm"
+     showgrid="true"
+     labelstyle="default"
+     inkscape:clip-to-page="false"
+     inkscape:zoom="2"
+     inkscape:cx="446.5"
+     inkscape:cy="261.5"
+     inkscape:window-width="2560"
+     inkscape:window-height="1419"
+     inkscape:window-x="1080"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       id="grid2"
+       units="mm"
+       originx="0"
+       originy="0"
+       spacingx="0.50000001"
+       spacingy="0.49999999"
+       empcolor="#d30000"
+       empopacity="1"
+       color="#e40000"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true"
+       dotted="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <rect
+       x="355"
+       y="421.5"
+       width="83"
+       height="17.75"
+       id="rect51" />
+    <symbol
+       id="uml-library.svg:uml-state"
+       viewBox="0 0 120 50">
+      <title
+         id="title1">uml-library.svg:uml-state_inkscape_duplicate</title>
+      <g
+         stroke="#000000"
+         fill="#ffffff"
+         stroke-width="1"
+         id="g18">
+        <rect
+           x="0.5"
+           y="0.5"
+           width="119"
+           height="49"
+           rx="10"
+           ry="10"
+           id="rect17" />
+      </g>
+    </symbol>
+    <symbol
+       id="circuitikz_1mm_grid.svg:ground2">
+      <path
+         d="M 28.362832,0"
+         fill="none"
+         id="path541"
+         style="stroke:#000000;stroke-width:0.264649;stroke-miterlimit:10" />
+      <path
+         d="M 28.362832,0 V 3.4999843"
+         fill="none"
+         id="path542"
+         style="stroke:#000000;stroke-width:0.264649;stroke-miterlimit:10" />
+      <path
+         d="m 26.262825,3.4999843 h 4.200014 l -2.100007,2.7999924 z"
+         fill="none"
+         id="path543"
+         style="stroke:#000000;stroke-width:0.264583;stroke-miterlimit:10;stroke-dasharray:none" />
+      <title
+         id="title543">ground</title>
+    </symbol>
+    <symbol
+       id="circuitikz_1mm_grid.svg:annotation3">
+      <title
+         id="title134">arrow</title>
+      <path
+         d="m 203.00001,-79.999998 h 5.6839"
+         fill="none"
+         style="stroke:#000000;stroke-width:0.264649;stroke-miterlimit:10"
+         id="path475" />
+      <g
+         transform="matrix(0.3514598,0,0,-0.3514598,208.61774,-79.999998)"
+         style="stroke:#000000;stroke-width:0.753;stroke-miterlimit:10"
+         id="g478">
+        <g
+           id="g477">
+          <g
+             id="g476">
+            <path
+               d="M 3.93294,0 0.3765,2.1406 v -4.2812 z"
+               id="path476" />
+          </g>
+        </g>
+      </g>
+      <title
+         id="title218">arrow</title>
+    </symbol>
+    <symbol
+       id="dashicons-set.svg:arrow-down"
+       viewBox="0 0 20 20">
+      <title
+         id="title28">arrow-down</title>
+      <path
+         d="M 15,8 10.97,14 7,8 Z"
+         id="path28" />
+    </symbol>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       stroke="#000000"
+       fill="#ffffff"
+       stroke-width="1"
+       id="g2"
+       transform="matrix(0.81159913,0,0,0.47585007,129.80405,12.651523)"
+       style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1">
+      <rect
+         x="0.5"
+         y="0.5"
+         width="119"
+         height="49"
+         rx="10"
+         ry="10"
+         id="rect2"
+         style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1" />
+    </g>
+    <use
+       xlink:href="#dashicons-set.svg:arrow-down"
+       width="20"
+       height="20"
+       style="fill:#5c5d5c;fill-opacity:1;stroke:#5c5c5c;stroke-opacity:1"
+       id="use1"
+       transform="matrix(0.81412313,0,0,0.46241478,169.15881,48.137798)" />
+    <g
+       stroke="#000000"
+       fill="#ffffff"
+       stroke-width="1"
+       id="g6"
+       transform="matrix(0.81159913,0,0,0.47585007,129.80405,55.003688)"
+       style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1">
+      <rect
+         x="0.5"
+         y="0.5"
+         width="119"
+         height="49"
+         rx="10"
+         ry="10"
+         id="rect6"
+         style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1" />
+    </g>
+    <g
+       stroke="#000000"
+       fill="#ffffff"
+       stroke-width="1"
+       id="g7"
+       transform="matrix(0.81159913,0,0,0.47585007,129.80405,97.355853)"
+       style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1">
+      <rect
+         x="0.5"
+         y="0.5"
+         width="119"
+         height="49"
+         rx="10"
+         ry="10"
+         id="rect7"
+         style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1" />
+    </g>
+    <g
+       stroke="#000000"
+       fill="#ffffff"
+       stroke-width="1"
+       id="g8"
+       transform="matrix(0.81159913,0,0,0.47585007,129.80405,139.70802)"
+       style="fill:#68b05a;fill-opacity:1;stroke:#595959;stroke-opacity:1">
+      <rect
+         x="0.5"
+         y="0.5"
+         width="119"
+         height="49"
+         rx="10"
+         ry="10"
+         id="rect8"
+         style="fill:#68b05a;fill-opacity:1;stroke:#595959;stroke-opacity:1" />
+    </g>
+    <g
+       stroke="#000000"
+       fill="#ffffff"
+       stroke-width="1"
+       id="g9"
+       transform="matrix(0.81159913,0,0,0.47585007,129.80405,182.06018)"
+       style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1">
+      <rect
+         x="0.5"
+         y="0.5"
+         width="119"
+         height="49"
+         rx="10"
+         ry="10"
+         id="rect9"
+         style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1" />
+    </g>
+    <g
+       stroke="#000000"
+       fill="#ffffff"
+       stroke-width="1"
+       id="g10"
+       transform="matrix(0.81159913,0,0,0.47585007,129.80405,224.41235)"
+       style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1">
+      <rect
+         x="0.5"
+         y="0.5"
+         width="119"
+         height="49"
+         rx="10"
+         ry="10"
+         id="rect10"
+         style="fill:#68b05a;fill-opacity:1;stroke:#545454;stroke-opacity:1" />
+    </g>
+    <path
+       style="fill:#49b36f;fill-opacity:1;stroke:#5f5f5f;stroke-width:1.37284;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       d="M 178.08026,51.710791 V 36.955968"
+       id="path17" />
+    <use
+       xlink:href="#dashicons-set.svg:arrow-down"
+       width="20"
+       height="20"
+       style="fill:#5c5d5c;fill-opacity:1;stroke:#5c5c5c;stroke-opacity:1"
+       id="use18"
+       transform="matrix(0.81412313,0,0,0.46241478,169.15881,90.49087)" />
+    <path
+       style="fill:#49b36f;fill-opacity:1;stroke:#5f5f5f;stroke-width:1.37284;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       d="M 178.08026,94.063869 V 79.309039"
+       id="path18" />
+    <use
+       xlink:href="#dashicons-set.svg:arrow-down"
+       width="20"
+       height="20"
+       style="fill:#5c5d5c;fill-opacity:1;stroke:#5c5c5c;stroke-opacity:1"
+       id="use19"
+       transform="matrix(0.81412313,0,0,0.46241478,169.15881,132.84831)" />
+    <path
+       style="fill:#49b36f;fill-opacity:1;stroke:#5f5f5f;stroke-width:1.37284;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       d="M 178.08026,136.4213 V 121.66648"
+       id="path19" />
+    <use
+       xlink:href="#dashicons-set.svg:arrow-down"
+       width="20"
+       height="20"
+       style="fill:#5c5d5c;fill-opacity:1;stroke:#5c5c5c;stroke-opacity:1"
+       id="use20"
+       transform="matrix(0.81412313,0,0,0.46241478,169.15881,175.20138)" />
+    <path
+       style="fill:#49b36f;fill-opacity:1;stroke:#5f5f5f;stroke-width:1.37284;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       d="M 178.08026,178.77437 V 164.01954"
+       id="path20" />
+    <use
+       xlink:href="#dashicons-set.svg:arrow-down"
+       width="20"
+       height="20"
+       style="fill:#5c5d5c;fill-opacity:1;stroke:#5c5c5c;stroke-opacity:1"
+       id="use21"
+       transform="matrix(0.81412313,0,0,0.46241478,169.15881,217.5984)" />
+    <path
+       style="fill:#49b36f;fill-opacity:1;stroke:#5f5f5f;stroke-width:1.37284;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       d="M 178.08026,221.1714 V 206.41657"
+       id="path21" />
+    <text
+       xml:space="preserve"
+       style="font-size:7.79637px;font-family:Cousine;-inkscape-font-specification:Cousine;text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#03be46;fill-opacity:1;stroke:#29bd41;stroke-width:1.0064;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="162.26234"
+       y="35.758438"
+       id="text22"><tspan
+         sodipodi:role="line"
+         id="tspan22"
+         style="stroke-width:1.0064"
+         x="162.26234"
+         y="35.758438" /></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.11065px;font-family:Cousine;-inkscape-font-specification:Cousine;text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#4b4b4b;fill-opacity:1;stroke:#5c5c5c;stroke-width:0.76329999;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="162.06447"
+       y="23.373158"
+       id="text23"
+       transform="scale(1.1014797,0.90786968)"><tspan
+         sodipodi:role="line"
+         id="tspan23"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.11065px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.76329999;stroke-opacity:1;stroke-dasharray:none"
+         x="162.06447"
+         y="23.373158">&gt;&gt; Setup</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.11065px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.76329999;stroke-opacity:1;stroke-dasharray:none"
+         x="162.06447"
+         y="32.600807"
+         id="tspan24">Docker, BIND, Postfix/Dovecot</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.26717px;font-family:Cousine;-inkscape-font-specification:Cousine;text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#4b4b4b;fill-opacity:1;stroke:#5c5c5c;stroke-width:0.779308;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="160.64099"
+       y="70.763184"
+       id="text37"
+       transform="scale(1.1165725,0.89559792)"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.26717px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.779308;stroke-opacity:1"
+         x="160.64099"
+         y="70.763184"
+         id="tspan37">&gt;&gt; Establishing Baseline</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.26717px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.779308;stroke-opacity:1"
+         x="160.64099"
+         y="80.193954"
+         id="tspan46">SPF, DKIM, DMARC</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.4423px;font-family:Cousine;-inkscape-font-specification:Cousine;text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#4b4b4b;fill-opacity:1;stroke:#5c5c5c;stroke-width:0.798089;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="160.58348"
+       y="117.22631"
+       id="text39"
+       transform="scale(1.1096022,0.90122389)"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.4423px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.798089;stroke-opacity:1"
+         x="160.58348"
+         y="117.22631"
+         id="tspan39">&gt;&gt; Attacks</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.4423px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.798089;stroke-opacity:1"
+         x="160.58348"
+         y="126.88435"
+         id="tspan47">swaks, espoofer</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.52023px;font-family:Cousine;-inkscape-font-specification:Cousine;text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#4b4b4b;fill-opacity:1;stroke:#5c5c5c;stroke-width:0.733133;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="155.81786"
+       y="170.18826"
+       id="text41"
+       transform="scale(1.1456371,0.87287678)"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.52023px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.733133;stroke-opacity:1"
+         x="155.81786"
+         y="170.18826"
+         id="tspan41">&gt;&gt; Artefacts</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.52023px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.733133;stroke-opacity:1"
+         x="155.81786"
+         y="179.94743"
+         id="tspan48">Logs, headers, auth traces</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:6.59694px;font-family:Cousine;-inkscape-font-specification:Cousine;text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#4b4b4b;fill-opacity:1;stroke:#5c5c5c;stroke-width:0.680347;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="145.14549"
+       y="232.76401"
+       id="text43"
+       transform="scale(1.2345227,0.81002966)"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.59694px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.680347;stroke-opacity:1"
+         x="145.14549"
+         y="232.76401"
+         id="tspan43">&gt;&gt; Features &amp; ML</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.59694px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.680347;stroke-opacity:1"
+         x="145.14549"
+         y="241.32501"
+         id="tspan49">Spoofed vs Legitimate </tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.59694px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.680347;stroke-opacity:1"
+         x="145.14549"
+         y="249.886"
+         id="tspan50">Classification</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:7.03482px;font-family:Cousine;-inkscape-font-specification:Cousine;text-align:center;letter-spacing:0px;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#4b4b4b;fill-opacity:1;stroke:#5c5c5c;stroke-width:0.685811;stroke-linecap:square;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke"
+       x="146.58659"
+       y="282.12839"
+       id="text45"
+       transform="scale(1.2246873,0.81653496)"><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.03482px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.685811;stroke-opacity:1"
+         x="146.58659"
+         y="282.12839"
+         id="tspan45">&gt;&gt; Hardening Auth Methods</tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.03482px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.685811;stroke-opacity:1"
+         x="146.58659"
+         y="291.25763"
+         id="tspan51">Changing SPF/DKIM/DMARC </tspan><tspan
+         sodipodi:role="line"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:7.03482px;font-family:'Classic Console';-inkscape-font-specification:'Classic Console';fill:#4b4b4b;fill-opacity:1;stroke:none;stroke-width:0.685811;stroke-opacity:1"
+         x="146.58659"
+         y="300.38687"
+         id="tspan53">Policies</tspan></text>
+    <text
+       xml:space="preserve"
+       transform="scale(0.44979167)"
+       id="text51"
+       style="fill:#5c5c5c;text-orientation:auto;-inkscape-font-specification:'Classic Console';font-family:'Classic Console';font-size:13.33333333px;stroke-width:2.23748031;letter-spacing:0px;text-align:center;paint-order:markers fill stroke;stroke-linecap:square;stroke-opacity:1;fill-opacity:1;writing-mode:lr-tb;direction:ltr;stroke:none;stroke-dasharray:none;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;white-space:pre;shape-inside:url(#rect51)" />
+  </g>
+</svg>
