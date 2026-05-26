@@ -1,0 +1,7 @@
+# ============================================================================
+# Postfix virtual alias map (source)
+# Compiled by entrypoint.sh into /etc/postfix/virtual.db via `postmap`.
+# ============================================================================
+root@victim.test        postmaster@victim.test
+abuse@victim.test       postmaster@victim.test
+hostmaster@victim.test  postmaster@victim.test

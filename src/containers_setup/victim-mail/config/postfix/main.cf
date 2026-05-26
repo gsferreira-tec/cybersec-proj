@@ -1,0 +1,72 @@
+# ============================================================================
+# Postfix main.cf — victim.test mail server (SEED Lab)
+#
+# Design choices for this lab:
+#   - mynetworks is INTENTIONALLY small (loopback only). Attacker container
+#     at 10.9.0.7 must be treated as "the internet" so SPF/DKIM/DMARC actually
+#     run against its messages. If you put 10.9.0.0/24 in mynetworks, the
+#     permit_mynetworks rule short-circuits all auth checks and the whole
+#     lab becomes pointless.
+#   - All milters are advisory: they ADD Authentication-Results headers but
+#     they do NOT reject. The lab is about observing what the auth stack
+#     said happened. Task 4 (Defence) is where students switch to enforcement.
+#   - No TLS. This is a closed Docker network with no real secrets.
+# ============================================================================
+
+# --- Identity ----------------------------------------------------------------
+myhostname    = mail.victim.test
+mydomain      = victim.test
+myorigin      = $mydomain
+mydestination = $myhostname, localhost.$mydomain, localhost
+inet_interfaces = all
+inet_protocols  = ipv4
+
+# CRITICAL: do NOT put 10.9.0.0/24 here (see header)
+mynetworks = 127.0.0.0/8 [::1]/128
+
+# --- Mailbox delivery via Dovecot LMTP --------------------------------------
+mailbox_transport = lmtp:unix:private/dovecot-lmtp
+virtual_transport = lmtp:unix:private/dovecot-lmtp
+
+# Recipient maps — victim.test is a "local" domain, so we list its users in
+# /etc/postfix/virtual-mailbox (generated at build time below).
+local_recipient_maps = $virtual_mailbox_maps
+virtual_mailbox_domains = victim.test
+virtual_mailbox_maps    = hash:/etc/postfix/vmailbox
+virtual_alias_maps      = hash:/etc/postfix/virtual
+
+# --- SASL (clients authenticate via Dovecot) --------------------------------
+smtpd_sasl_type           = dovecot
+smtpd_sasl_path           = private/auth
+smtpd_sasl_auth_enable    = yes
+smtpd_sasl_security_options = noanonymous
+broken_sasl_auth_clients  = yes
+
+# --- Restrictions: accept attacker mail, run SPF policy, no rejections ------
+smtpd_helo_required       = no
+smtpd_recipient_restrictions =
+    permit_mynetworks
+    permit_sasl_authenticated
+    reject_unauth_destination
+    check_policy_service unix:private/policyd-spf
+
+policyd-spf_time_limit = 3600
+
+# --- Milters: Rspamd first, then OpenDMARC ----------------------------------
+# Order matters: OpenDMARC must run after the milter that performs DKIM work.
+milter_default_action = accept
+milter_protocol       = 6
+milter_mail_macros    = i {mail_addr} {client_addr} {client_name} {auth_authen}
+smtpd_milters         = inet:localhost:11332, inet:localhost:8893
+non_smtpd_milters     = inet:localhost:11332, inet:localhost:8893
+
+# --- Misc -------------------------------------------------------------------
+smtpd_banner = $myhostname ESMTP
+biff = no
+append_dot_mydomain = no
+readme_directory = no
+compatibility_level = 2
+
+# Make the X-Originating-IP / Received headers verbose enough for the lab.
+# Students need to see the attacker's source IP in the received chain.
+smtpd_client_restrictions =

@@ -1,0 +1,10 @@
+# ============================================================================
+# Postfix virtual mailbox map (source)
+# Compiled by entrypoint.sh into /etc/postfix/vmailbox.db via `postmap`.
+# Format:   <recipient>  <relative mailbox path — informational only>
+# Delivery is via Dovecot LMTP; the path here is unused but conventional.
+# ============================================================================
+alice@victim.test       victim.test/alice/
+bob@victim.test         victim.test/bob/
+user@victim.test        victim.test/user/
+postmaster@victim.test  victim.test/postmaster/

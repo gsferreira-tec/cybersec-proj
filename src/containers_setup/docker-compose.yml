@@ -1,107 +1,119 @@
-version: "3"
-
 services:
-    #dns-server:
-    #    build : ./bind
-    #    image: dns-server-custom
-    #    container_name: dns-server-10.9.0.5
-    #    tty: true
-    #    cap_add:
-    #            - ALL
-    #    networks:
-    #        net-10.9.0.0:
-    #            ipv4_address: 10.9.0.5
-    #    volumes:
-    #      - ./bind/zones/db.victim.test:/etc/bind/db.victim.test:ro
-    #      - ./bind/zones/db.attacker.test:/etc/bind/db.attacker.test:ro
-    #    restart: always
-    
-    dns-server:
-        build : ./bind
-        image: dns-server-custom
-        container_name: dns-server-10.9.0.5
-        tty: true
-        cap_add:
-                - ALL
-        networks:
-            net-10.9.0.0:
-                ipv4_address: 10.9.0.5
-        restart: always
-                  
-    victim-mail:
-        #image: handsonsecurity/seed-ubuntu:large
-        image: mailserver/docker-mailserver:latest 
-        container_name: victim-mail-10.9.0.6
-        hostname: mail
-        domainname: victim.test
-        environment:
-            - POSTMASTER_ADDRESS=postmaster@victim.test
-            - ENABLE_SPAMASSASSIN=1
-            - ENABLE_CLAMAV=0
-            - ENABLE_FAIL2BAN=0
+  dns-server:
+    build: ./bind
+    image: dns-server-custom
+    container_name: dns-server-10.9.0.5
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-10.9.0.0:
+        ipv4_address: 10.9.0.5
+    restart: always
 
-        tty: true
-        cap_add:
-                - ALL
-        networks:
-            net-10.9.0.0:
-                ipv4_address: 10.9.0.6
+  # victim-mail:
+  #   # image: handsonsecurity/seed-ubuntu:large
+  #   image: mailserver/docker-mailserver:latest
+  #   container_name: victim-mail-10.9.0.6
+  #   hostname: mail
+  #   domainname: victim.test
+  #   environment:
+  #     - POSTMASTER_ADDRESS=postmaster@victim.test
+  #     - ENABLE_SPAMASSASSIN=1
+  #     - ENABLE_CLAMAV=0
+  #     - ENABLE_FAIL2BAN=0
+  #
+  #   tty: true
+  #   cap_add:
+  #     - ALL
+  #   networks:
+  #     net-10.9.0.0:
+  #       ipv4_address: 10.9.0.6
+  #
+  #   dns:
+  #     - 10.9.0.5 # IP from attacker's DNS server
+  #
+  #   ports:
+  #     - "2525:25" # STMP
+  #     - "1143:143" # IMAP
+  #   # Host ports were changed to avoid conflict
+  #
+  #   volumes:
+  #     - ./maildata:/tmp/docker-mailserver
+  #     - ./ml-detector:/home/ml-detector
+  #
+  #   # command: bash -c "/etc/init.d/postfix start && /etc/init.d/dovecot start && tail -f /dev/null"
+  #
+  #   restart: always
 
-        dns:
-          - 10.9.0.5 # IP from attacker's DNS server 
+  victim-mail:
+    # image: handsonsecurity/seed-ubuntu:large
+    build: ./victim-mail
+    image: victim-mail-custom
+    container_name: victim-mail-10.9.0.6
+    hostname: mail
+    domainname: victim.test
 
-        ports:
-          - "2525:25"   # STMP
-          - "1143:143"  # IMAP
-        # Host ports were changed to avoid conflict
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-10.9.0.0:
+        ipv4_address: 10.9.0.6
 
-        volumes:
-          - ./maildata:/tmp/docker-mailserver
-          - ./ml-detector:/home/ml-detector
-        
-        #command: bash -c "/etc/init.d/postfix start && /etc/init.d/dovecot start && tail -f /dev/null"
+    dns:
+      - 10.9.0.5 # IP from attacker's DNS server
 
+    ports:
+      - "2525:25" # STMP
+      - "1143:143" # IMAP
+    # Host ports were changed to avoid conflict
 
-        restart: always
+    volumes:
+      - ./maildata/keys:/etc/rspamd/keys:ro
+      - ./ml-detector:/home/ml-detector
+      - ./victim-mail/config/rspamd:/etc/rspamd/local.d:ro
 
-    attacker-sender: 
-        image: handsonsecurity/seed-ubuntu:large
-        container_name: attacker-sender-10.9.0.7
-        hostname: attacker
-        tty: true
-        cap_add:
-                - ALL
-        networks:
-            net-10.9.0.0:
-              ipv4_address: 10.9.0.7
+    restart: always
 
-        volumes:
-          - ./espoofer/:/home/seed/espoofer
-          - ./attacks/:/home/seed/attacks
-          - ./init-setup/:/home/seed/init-setup
+  attacker-sender:
+    image: handsonsecurity/seed-ubuntu:large
+    container_name: attacker-sender-10.9.0.7
+    hostname: attacker
+    tty: true
+    cap_add:
+      - ALL
+    networks:
+      net-10.9.0.0:
+        ipv4_address: 10.9.0.7
 
-        command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null && /home/seed/init-setup/RUNME-1ST.sh"
+    volumes:
+      - ./espoofer/:/home/seed/espoofer
+      - ./attacks/:/home/seed/attacks
+      - ./init-setup/:/home/seed/init-setup
 
-    webmail:
-        image: roundcube/roundcubemail:latest
-        container_name: webmail-10.9.0.8
-        networks:
-            net-10.9.0.0:
-                ipv4_address: 10.9.0.8
-        ports:
-            - "8080:80"    # access via browser at http://localhost:8080
-        environment:
-            - ROUNDCUBEMAIL_DEFAULT_HOST=10.9.0.6      # victim mail server
-            - ROUNDCUBEMAIL_DEFAULT_PORT=143            # IMAP
-            - ROUNDCUBEMAIL_SMTP_SERVER=10.9.0.6       # SMTP
-            - ROUNDCUBEMAIL_SMTP_PORT=25
-        depends_on:
-            - victim-mail
+    command: bash -c "/etc/init.d/openbsd-inetd start && tail -f /dev/null && /home/seed/init-setup/RUNME-1ST.sh"
+
+  webmail:
+    image: roundcube/roundcubemail:latest
+    container_name: webmail-10.9.0.8
+    networks:
+      net-10.9.0.0:
+        ipv4_address: 10.9.0.8
+    ports:
+      - "8080:80" # access via browser at http://localhost:8080
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=10.9.0.6 # victim mail server
+      - ROUNDCUBEMAIL_DEFAULT_PORT=143 # IMAP
+      - ROUNDCUBEMAIL_SMTP_SERVER=10.9.0.6 # SMTP
+      - ROUNDCUBEMAIL_SMTP_PORT=25
+    depends_on:
+      - victim-mail
 
 networks:
   net-10.9.0.0:
-      name: net-10.9.0.0
-      ipam:
-          config:
-              - subnet: 10.9.0.0/24
-
+    driver: bridge
+    name: net-10.9.0.0
+    ipam:
+      config:
+        - subnet: 10.9.0.0/24

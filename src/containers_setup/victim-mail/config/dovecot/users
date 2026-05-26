@@ -1,0 +1,12 @@
+# ============================================================================
+# Dovecot passwd-file
+# Format:   username:password:uid:gid:gecos:home:shell:extra
+# Empty fields take defaults from dovecot.conf 'default_fields'.
+#
+# ⚠ PLAIN passwords — fine for a lab on an isolated 10.9.0.0/24 network.
+#   DO NOT REUSE these credentials anywhere.
+# ============================================================================
+alice:{PLAIN}pass123::::::
+bob:{PLAIN}123pass::::::
+postmaster:{PLAIN}root123::::::
+user:{PLAIN}seed-lab::::::

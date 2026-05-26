@@ -472,64 +472,39 @@ reloading BIND, otherwise BIND may not actually pick up your changes.
 
 \subsection{Task 1.1 --- No Authentication}
 
-In this baseline scenario, \texttt{victim.test} publishes \emph{no} SPF,
-DKIM, or DMARC records at all: receivers have no protocol-level
+In this baseline scenario, \texttt{victim.test} publishes \emph{no}
+SPF, DKIM, or DMARC records: receivers have no protocol-level
 information about who is allowed to send mail for this domain.
 
-\paragraph{Step 1 --- Disable all authentication records.}
-Open \texttt{db.victim.test} and ensure that the SPF and DMARC lines
-are commented out, and that no DKIM selector record is present, e.g.:
+\paragraph{Configure.}
+Open \texttt{containers\_setup/bind/zones/db.victim.test} and ensure
+all three records (SPF, DKIM, DMARC) are commented out. Bump the SOA
+serial and run \texttt{./reload-zones.sh}. Verify with
+\texttt{spoofmaster> policy} that all three sections return empty
+answers.
 
+\paragraph{Attack.}
 \begin{listing}[H]
 \begin{minted}{text}
-; --- INTENTIONAL MISCONFIGURATIONS (for Task 1.1) ---
-
-; SPF: disabled
-; @       IN  TXT     "v=spf1 mx ~all"
-
-; DKIM: no selector/_domainkey record for victim.test
-
-; DMARC: disabled
-; _dmarc  IN  TXT     "v=DMARC1; p=none; aspf=r; adkim=r"
+spoofmaster> spf
+Target Email:    bob@victim.test
+Real Sender:     attacker@victim.test
+Fake Sender:     ceo@victim.test
+Message Body:    Hi Bob, urgent request from the CEO...
 \end{minted}
 \end{listing}
 
-Reload the DNS server and verify that no SPF or DMARC records exist:
-
-\begin{listing}[H]
-\begin{minted}{text}
-(attacker)$ dig TXT victim.test        @10.9.0.5    # no SPF
-(attacker)$ dig TXT _dmarc.victim.test @10.9.0.5    # no DMARC
-\end{minted}
-\end{listing}
-
-\paragraph{Step 2 --- Spoofed email with no authentication.}
-Send a spoofed email that pretends to come from the CEO at
-\texttt{victim.test}:
-
-\begin{listing}[H]
-\begin{minted}{text}
-(attacker)$ swaks \
-  --from attacker@victim.test \
-  --to bob@victim.test \
-  --server 10.9.0.6 --port 25 \
-  --helo mail.attacker.test \
-  --header "From: CEO <ceo@victim.test>" \
-  --header "Subject: No-auth baseline" \
-  --body "This is a spoofed email with no authentication at all."
-\end{minted}
-\end{listing}
-
-Retrieve the message from Bob's inbox (via the webmail UI at
-\texttt{http://localhost:8080} or via IMAP on
-\texttt{localhost:1143}) and examine the full headers.
+\paragraph{Inspect.}
+Open Bob's inbox in the webmail UI (\url{http://localhost:8080}) and
+examine the full headers of the delivered message.
 
 \paragraph{Questions.}
 \begin{enumerate}[noitemsep]
-  \item Which, if any, \texttt{Authentication-Results} fields are
+  \item Which (if any) \texttt{Authentication-Results} fields are
         present for SPF, DKIM, or DMARC?
-  \item Does the message reach Bob's inbox? If so, what evidence (if
-        any) would allow a human user or filter to detect spoofing?
+  \item Does the message reach Bob's inbox? What evidence in the
+        headers (if any) would allow a human or filter to detect the
+        spoofing?
   \item How difficult would it be for an attacker to impersonate
         \emph{any} user at \texttt{victim.test} in this configuration?
 \end{enumerate}
@@ -537,223 +512,166 @@ Retrieve the message from Bob's inbox (via the webmail UI at
 \subsection{Task 1.2 --- SPF-Only Deployment}
 
 In this scenario, \texttt{victim.test} publishes an SPF record but no
-DKIM or DMARC records. You will explore both the soft-fail and
-hard-fail variants to understand why the qualifier matters.
+DKIM or DMARC records. You will compare soft-fail
+(\texttt{\textasciitilde all}) and hard-fail (\texttt{-all}) variants
+to understand why the qualifier matters.
 
-\paragraph{Step 1 --- Enable SPF (soft-fail), keep DKIM and DMARC disabled.}
-Edit \texttt{db.victim.test} so that the SPF line is active with the
-\texttt{\textasciitilde all} qualifier:
-
-\begin{listing}[H]
-\begin{minted}{text}
-; SPF: enabled (soft-fail policy)
-@       IN  TXT     "v=spf1 mx ~all"
-
-; DKIM: still no selector/_domainkey record for victim.test
-
-; DMARC: disabled
-; _dmarc IN TXT "v=DMARC1; p=none; aspf=r; adkim=r"
-\end{minted}
-\end{listing}
-
-Reload the DNS server and verify:
+\paragraph{Configure (soft-fail).}
+In \texttt{db.victim.test}, uncomment the soft-fail SPF line:
 
 \begin{listing}[H]
 \begin{minted}{text}
-(attacker)$ dig TXT victim.test        @10.9.0.5   # SPF visible
-(attacker)$ dig TXT _dmarc.victim.test @10.9.0.5   # no DMARC
+@   IN  TXT  "v=spf1 mx ~all"
 \end{minted}
 \end{listing}
 
-\paragraph{Step 2 --- SPF-based spoofing with envelope/header mismatch.}
-Recall from Section~2.1 that SPF checks only the \emph{envelope sender}
-(SMTP \texttt{MAIL FROM}) and never validates the visible
-\texttt{From:} header.
-Exploit this by using an envelope sender from your SPF-authorised
-\texttt{attacker.test} domain while forging the visible \texttt{From:}
-to look like Alice at \texttt{victim.test}:
+Leave DKIM and DMARC commented. Bump the serial, reload, verify with
+\texttt{spoofmaster> policy}.
+
+\paragraph{Attack.}
+This time the attacker uses an envelope sender from their own
+SPF-authorised domain (\texttt{attacker.test}) while forging the
+visible \texttt{From:} to look like Alice at \texttt{victim.test}:
 
 \begin{listing}[H]
 \begin{minted}{text}
-(attacker)$ swaks \
-  --from attacker@attacker.test \
-  --to bob@victim.test \
-  --server 10.9.0.6 --port 25 \
-  --helo mail.attacker.test \
-  --header "From: Alice <alice@victim.test>" \
-  --header "Subject: SPF-only bypass" \
-  --body "Hi Bob, this looks like it came from Alice."
+spoofmaster> spf
+Target Email:    bob@victim.test
+Real Sender:     attacker@attacker.test    # envelope from attacker.test
+Fake Sender:     alice@victim.test         # forged visible From:
+Message Body:    Hi Bob, here's that report you asked for.
 \end{minted}
 \end{listing}
 
-Retrieve the message and inspect the \texttt{Authentication-Results}
-and \texttt{Received-SPF} headers.
-
-\paragraph{Step 3 --- (Optional) Try the same attack with hard-fail SPF.}
-Change the SPF record to use \texttt{-all} (hard-fail), reload BIND,
-and re-run the \texttt{swaks} command from Step~2. Compare the
-\texttt{Received-SPF} header and whether the message is still delivered
-or rejected.
+\paragraph{Optional --- compare with hard-fail.}
+Switch the active SPF line in the zone to \texttt{-all}, reload, and
+re-run the same \texttt{spoofmaster> spf} flow. Compare delivery
+outcomes and the \texttt{Received-SPF} header value.
 
 \paragraph{Questions.}
 \begin{enumerate}[noitemsep]
-  \item What is the \texttt{spf=} result for the message in Step~2? Why?
+  \item What is the \texttt{spf=} result for the message? Which
+        domain did SPF authenticate against?
   \item What domain appears in the visible \texttt{From:} header that
-        Bob sees, and what domain authenticated via SPF?
-  \item Does SPF, by itself, prevent Bob from being fooled by this
-        message? Explain in terms of envelope vs.\ header sender.
+        Bob sees, and how does it relate to the SPF-authenticated
+        domain?
+  \item Does SPF, by itself, prevent Bob from being fooled? Explain in
+        terms of envelope vs.\ header sender.
   \item How does switching from \texttt{\textasciitilde all} to
-        \texttt{-all} change the outcome? Is the SPF result enough to
-        block the attack on its own?
+        \texttt{-all} change the outcome? Is the SPF result alone
+        enough to block this attack class?
 \end{enumerate}
 
 \subsection{Task 1.3 --- DKIM-Only Deployment}
 
-In this scenario, \texttt{victim.test} uses DKIM signing but publishes
-no SPF or DMARC records.
-Receivers can verify a cryptographic signature on the message, but
-without a DMARC policy there is no enforcement tying that result to a
-delivery decision.
+In this scenario, \texttt{victim.test} publishes a DKIM key but no
+SPF or DMARC records. Receivers can verify a cryptographic signature
+on the message, but no policy ties that result to a delivery decision.
 
-\paragraph{Step 1 --- Generate a DKIM key pair for the victim.}
-On the attacker container (or any host with \texttt{openssl}), generate
-a 2048-bit RSA key pair and extract the single-line base64 public key
-that goes into DNS:
+\paragraph{Configure.}
+A DKIM key pair has already been generated for the victim domain
+(see \texttt{maildata/opendkim/keys/victim.test/}). Uncomment the
+\texttt{mail.\_domainkey} TXT record in \texttt{db.victim.test} so the
+public half is published in DNS. Keep SPF and DMARC commented. Bump
+the serial, reload, and verify with \texttt{spoofmaster> policy}.
 
-\begin{listing}[H]
-\begin{minted}{text}
-(attacker)$ cd /tmp
-(attacker)$ openssl genrsa -out dkim_private.pem 2048
-(attacker)$ openssl rsa -in dkim_private.pem -pubout -out dkim_public.pem
-(attacker)$ grep -v '^-' dkim_public.pem | tr -d '\n'
-\end{minted}
-\end{listing}
+A legitimate test message from \texttt{alice@victim.test} to
+\texttt{bob@victim.test} (sent through the webmail UI) should now
+appear in Bob's inbox with \texttt{dkim=pass} in
+\texttt{Authentication-Results}.
 
-Copy the printed base64 string; you will paste it into the DNS zone in
-the next step. Place the private key inside the victim mail server's
-DKIM directory (the path is provided in the project
-\texttt{README}). You will need this key again in Task~4.
-
-\paragraph{Step 2 --- Publish the DKIM selector, disable SPF/DMARC.}
-Edit \texttt{db.victim.test} to disable SPF and DMARC and publish the
-DKIM selector (replace \texttt{<PUBKEY>} with the base64 string from
-Step~1):
+\paragraph{Attack.}
+The attacker sends a spoofed message carrying a syntactically valid
+but cryptographically bogus \texttt{DKIM-Signature} header
+(constructed automatically by \texttt{attack.sh}'s \texttt{dkim} mode):
 
 \begin{listing}[H]
 \begin{minted}{text}
-; SPF: disabled for Task 1.3
-; @       IN  TXT     "v=spf1 mx ~all"
-
-; DKIM: publish a selector for victim.test
-default._domainkey IN TXT "v=DKIM1; k=rsa; p=<PUBKEY>"
-
-; DMARC: disabled for Task 1.3
-; _dmarc IN TXT "v=DMARC1; p=none; aspf=r; adkim=r"
+spoofmaster> dkim
+Target Email:    bob@victim.test
+Real Sender:     attacker@attacker.test
+Fake Sender:     ceo@victim.test
+Message Body:    Approve the wire transfer per attached invoice.
 \end{minted}
 \end{listing}
 
-Reload DNS and verify that the DKIM selector exists:
-
-\begin{listing}[H]
-\begin{minted}{text}
-(attacker)$ dig TXT default._domainkey.victim.test @10.9.0.5
-\end{minted}
-\end{listing}
-
-Configure the victim mail server (Postfix + OpenDKIM) to sign outbound
-mail from \texttt{victim.test} with the corresponding private key. Send
-a legitimate email from \texttt{alice@victim.test} to
-\texttt{bob@victim.test} via the webmail UI and confirm that
-\texttt{dkim=pass} appears in \texttt{Authentication-Results}.
-
-\paragraph{Step 3 --- Spoofed email with broken DKIM signature.}
-Now craft a spoofed message that carries a syntactically valid but
-cryptographically invalid \texttt{DKIM-Signature} header:
-
-\begin{listing}[H]
-\begin{minted}{text}
-(attacker)$ swaks \
-  --from attacker@attacker.test \
-  --to bob@victim.test \
-  --server 10.9.0.6 --port 25 \
-  --helo mail.attacker.test \
-  --header "From: CEO <ceo@victim.test>" \
-  --header "Subject: DKIM-only bypass" \
-  --header "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=default; h=from:to:subject; bh=invalidhash; b=invaliddata" \
-  --body "Spoofed mail with an invalid DKIM signature."
-\end{minted}
-\end{listing}
+\begin{notebox}
+\textbf{Note on DKIM failure modes.} Depending on the verifier
+implementation, you may observe
+\texttt{reason="signature verification failed"} (the textbook
+outcome --- the verifier fetched the public key and the cryptographic
+check failed) or \texttt{reason="key not found in DNS"} (an
+implementation quirk in the OpenDKIM build shipped with
+\texttt{docker-mailserver}, where the verifier rejects the key
+internally even though DNS returned it correctly). Both are forms of
+\texttt{dkim=fail} and produce the same downstream behaviour. Record
+which reason your verifier produced.
+\end{notebox}
 
 \paragraph{Questions.}
 \begin{enumerate}[noitemsep]
-  \item What is the \texttt{dkim=} result for this spoofed message?
-  \item Does the message still reach Bob's inbox? Why might a receiver
-        accept a message with \texttt{dkim=fail}?
+  \item What is the \texttt{dkim=} result for the spoofed message?
+  \item Does the message still reach Bob's inbox? Why might a
+        receiver accept a message with \texttt{dkim=fail}, regardless
+        of the specific failure reason?
   \item What additional policy or configuration would be required to
         reject messages with broken DKIM signatures?
+  \item In a real-world attack, an attacker spoofing a domain they do
+        not control cannot generate a valid signature with the
+        victim's private key, and cannot publish a public key under
+        the victim's domain. The forged DKIM header in this task
+        simulates both limitations. Which of these does the DKIM
+        protocol itself address, and which is purely operational?
 \end{enumerate}
 
 \subsection{Task 1.4 --- DMARC-Only Deployment}
 
-DMARC is designed to enforce \emph{alignment} of authenticated
-identities (from SPF and/or DKIM) with the visible \texttt{From:}
-domain.
-If a domain publishes DMARC but does not deploy SPF or DKIM, DMARC has
-no underlying authentication results to align --- and the policy
-becomes effectively meaningless. This task makes that crystal clear.
+DMARC enforces \emph{alignment} of authenticated identities (from SPF
+or DKIM) with the visible \texttt{From:} domain. If a domain publishes
+DMARC but does not deploy SPF or DKIM, DMARC has no underlying
+authentication results to align --- and the policy becomes
+effectively meaningless. This task makes that clear.
 
-\paragraph{Step 1 --- Enable DMARC, disable SPF/DKIM.}
-Configure \texttt{db.victim.test} so that only the DMARC record is
-active:
+\paragraph{Configure.}
+In \texttt{db.victim.test}, uncomment only the DMARC line:
 
 \begin{listing}[H]
 \begin{minted}{text}
-; SPF: disabled for Task 1.4
-; @       IN  TXT     "v=spf1 mx ~all"
-
-; DKIM: no selector/_domainkey record for victim.test
-; default._domainkey IN TXT "v=DKIM1; k=rsa; p=..."
-
-; DMARC: enabled, but depends on SPF/DKIM results
 _dmarc IN TXT "v=DMARC1; p=none; aspf=r; adkim=r"
 \end{minted}
 \end{listing}
 
-Reload DNS and verify:
+Leave SPF and DKIM commented out. Bump the serial, reload, verify
+with \texttt{spoofmaster> policy}.
+
+\paragraph{Attack.}
+The attacker sends from their own SPF-authorised domain
+(\texttt{attacker.test}) with a forged visible \texttt{From:} header
+claiming \texttt{victim.test}. With no SPF or DKIM records published
+for \texttt{victim.test}, there is nothing for DMARC to align against:
 
 \begin{listing}[H]
 \begin{minted}{text}
-(attacker)$ dig TXT victim.test                       @10.9.0.5  # no SPF
-(attacker)$ dig TXT default._domainkey.victim.test    @10.9.0.5  # no DKIM
-(attacker)$ dig TXT _dmarc.victim.test                @10.9.0.5  # DMARC
-\end{minted}
-\end{listing}
-
-\paragraph{Step 2 --- Spoofed email with DMARC-only configuration.}
-Re-use a simple spoof similar to Task~1.1:
-
-\begin{listing}[H]
-\begin{minted}{text}
-(attacker)$ swaks \
-  --from attacker@victim.test \
-  --to bob@victim.test \
-  --server 10.9.0.6 --port 25 \
-  --helo mail.attacker.test \
-  --header "From: CEO <ceo@victim.test>" \
-  --header "Subject: DMARC-only bypass" \
-  --body "DMARC is present, but SPF and DKIM are missing."
+spoofmaster> dmarc
+Target Email:    bob@victim.test
+Real Sender:     attacker@attacker.test    # envelope from attacker.test
+Fake Sender:     ceo@victim.test           # forged visible From:
+Message Body:    DMARC is published but has nothing to enforce on.
 \end{minted}
 \end{listing}
 
 \paragraph{Questions.}
 \begin{enumerate}[noitemsep]
   \item What are the \texttt{spf=}, \texttt{dkim=}, and \texttt{dmarc=}
-        results in the \texttt{Authentication-Results} header?
-  \item Why does DMARC, by itself, not prevent delivery of this spoofed
-        message when SPF and DKIM are absent?
-  \item How would the behaviour change if SPF and/or DKIM were properly
-        deployed and DMARC were set to \texttt{p=quarantine} or
-        \texttt{p=reject}? You will validate this empirically in Task~4.
+        results in \texttt{Authentication-Results}? Why does
+        \texttt{dmarc=} report what it does?
+  \item DMARC's main mechanism is \emph{alignment} between an
+        authenticated identity (from SPF or DKIM) and the visible
+        \texttt{From:} domain. What identity does DMARC have available
+        to align in this scenario?
+  \item In Task~4.3 you will deploy SPF + DMARC together. Predict what
+        the \texttt{dmarc=} result will be for this same attack when
+        SPF is also active. Why?
 \end{enumerate}
 
 %% ══════════════════════════════════════════════════════════════════
@@ -936,7 +854,7 @@ significance.
 Python's standard \texttt{email} library can parse raw messages:
 
 \begin{listing}[H]
-\begin{minted}{text	}
+\begin{minted}{text}
 import email
 
 with open("raw_message.eml", "r") as f:
