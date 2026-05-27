@@ -425,6 +425,7 @@
         \item DMARC: policy \texttt{p=none}, relaxed alignment.
       \end{itemize}
       \end{block}
+      \vfill
       \begin{figure}[H]
       	\centering
       	\includegraphics[width=\textwidth]{testcase_images/2nd-testcase-spfsoft.png}
@@ -433,11 +434,12 @@
      \vspace{-5pt}
 	  \begin{figure}[H]
       	\centering
-      	\includegraphics[width=0.6\textwidth]{testcase_images/3rd-testcase-spfhard.png}
+      	\includegraphics[width=0.85\textwidth, height=5.5cm]{testcase_images/3rd-testcase-spfhard.png}
       \end{figure}
       \vspace{-10pt}
       \begin{block}{>> After (Hardened)}
       \begin{itemize}
+      	\tiny
         \item SPF: strict \verb|-all| and limited authorized hosts.
         \item DKIM: properly published selector and validated key.
         \item DMARC: \verb|p=reject| with strict alignment for SPF and DKIM.

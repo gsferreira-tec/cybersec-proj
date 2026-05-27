@@ -1,6 +1,6 @@
 $TTL 60
 @   IN  SOA     ns1.victim.test. admin.victim.test. (
-                  2026052318 ; Serial (YYYYMMDDNN)
+                  2026052321 ; Serial (YYYYMMDDNN)
                   3600       ; Refresh
                   900        ; Retry
                   604800     ; Expire
@@ -18,7 +18,7 @@ mail    IN  A       10.9.0.6
 
 ; === TEST MODE: SPF — uncomment ONE ===
 ; (none active)                                          ; no SPF record published
-;@      IN  TXT     "v=spf1 mx ~all"                     ; soft fail
+@      IN  TXT     "v=spf1 mx ~all"                     ; soft fail
 ;@      IN  TXT     "v=spf1 mx -all"                     ; hard fail
 ;@      IN  TXT     "v=spf1 +all"                        ; INSECURE — allows anyone (demo only)
 
