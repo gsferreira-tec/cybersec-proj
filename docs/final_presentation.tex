@@ -190,6 +190,33 @@
     \end{block}
 \end{frame}
 
+\subsection{Lab Architecture}
+\begin{frame}{Lab Architecture}
+  \transdissolve
+  \begin{columns}[T]
+    \column{0.55\textwidth}
+      \begin{block}{>> Lab Docker Network Setup}
+      \begin{itemize}
+        \item Isolated Docker network with four main containers:
+        \begin{itemize}
+          \item DNS server (BIND) hosting SPF/DKIM/DMARC records.
+          \item Victim mail server (Postfix + Dovecot).
+          \item Attacker container running \texttt{swaks} and Espoofer.
+          \item Webmail client for victim-side inspection.
+        \end{itemize}
+        \item No connectivity to the real Internet to keep attacks contained.
+      \end{itemize}
+    \end{block}
+    \column{0.45\textwidth}
+      \begin{figure}
+        \centering
+        \includegraphics[width=0.95\linewidth]{networkdiagram.png}
+        \caption{Docker-based isolated mail infrastructure}
+      \end{figure}
+  \end{columns}
+\end{frame}
+
+
 \subsection{Experimental Workflow}
 \begin{frame}{Experimental Workflow}
   \transdissolve
@@ -238,32 +265,6 @@
   \end{minted}
 \end{frame}
 
-\subsection{Lab Architecture}
-\begin{frame}{Lab Architecture}
-  \transdissolve
-  \begin{columns}[T]
-    \column{0.55\textwidth}
-      \begin{block}{>> Lab Docker Network Setup}
-      \begin{itemize}
-        \item Isolated Docker network with four main containers:
-        \begin{itemize}
-          \item DNS server (BIND) hosting SPF/DKIM/DMARC records.
-          \item Victim mail server (Postfix + Dovecot).
-          \item Attacker container running \texttt{swaks} and Espoofer.
-          \item Webmail client for victim-side inspection.
-        \end{itemize}
-        \item No connectivity to the real Internet to keep attacks contained.
-      \end{itemize}
-    \end{block}
-    \column{0.45\textwidth}
-      \begin{figure}
-        \centering
-        \includegraphics[width=0.95\linewidth]{networkdiagram.png}
-        \caption{Docker-based isolated mail infrastructure}
-      \end{figure}
-  \end{columns}
-\end{frame}
-
 % =========================
 \section{Authentication Protocols}
 % =========================
@@ -290,11 +291,11 @@
   \transdissolve
   \begin{columns}[T]
     \column{0.40\textwidth}
-      \begin{block}{>> Examples from the Lab}
+      \begin{block}{>> Examples from the Lab}      
       \begin{itemize}
-        \item SPF: \verb|v=spf1 mx ~all| (soft-fail, accepts suspicious senders).
-        \item DKIM: selector not published or key mismatch.
-        \item DMARC: \verb|v=DMARC1; p=none; aspf=r; adkim=r| (monitoring only, relaxed alignment).
+        \item \hspace{-20pt} SPF: \verb|v=spf1 mx ~all| (soft-fail, accepts suspicious senders).
+        \item \hspace{-20pt} DKIM: selector not published or key mismatch.
+        \item \hspace{-20pt} DMARC: \\ \texttt{v=DMARC1; p=none; aspf=r; adkim=r} (monitoring only, relaxed alignment).
       \end{itemize}
       \end{block}
     \column{0.60\textwidth}
@@ -415,7 +416,8 @@
 \begin{frame}[fragile]{Infrastructure Hardening}
   \transdissolve
   \begin{columns}[T]
-    \column{0.5\textwidth}
+    \column{0.40\textwidth}
+      \vspace{-5pt}
       \begin{block}{>> Before (Vulnerable)}
       \begin{itemize}
         \item SPF: soft-fail, permissive includes.
@@ -423,7 +425,17 @@
         \item DMARC: policy \texttt{p=none}, relaxed alignment.
       \end{itemize}
       \end{block}
-    \column{0.5\textwidth}
+      \begin{figure}[H]
+      	\centering
+      	\includegraphics[width=\textwidth]{testcase_images/2nd-testcase-spfsoft.png}
+      \end{figure}
+    \column{0.59\textwidth}
+     \vspace{-5pt}
+	  \begin{figure}[H]
+      	\centering
+      	\includegraphics[width=0.6\textwidth]{testcase_images/3rd-testcase-spfhard.png}
+      \end{figure}
+      \vspace{-10pt}
       \begin{block}{>> After (Hardened)}
       \begin{itemize}
         \item SPF: strict \verb|-all| and limited authorized hosts.
