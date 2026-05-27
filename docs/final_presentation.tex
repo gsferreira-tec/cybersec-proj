@@ -143,6 +143,7 @@
 \end{frame}
 
 \begin{frame}{Table of Contents}
+  \transdissolve
   \tableofcontents
 \end{frame}
 
@@ -151,7 +152,8 @@
 % ======================
 \subsection{Why Email Spoofing Still Works}
 \begin{frame}{Why Email Spoofing Still Works}
-  \begin{block}{Problem}
+  \transdissolve
+  \begin{block}{>> Problem}
       \begin{itemize}
         \item Phishing campaigns still succeed because email sender authentication is often misconfigured or only partially deployed.
         \item Attackers can impersonate trusted identities even when some authentication mechanisms seem to be enabled.
@@ -159,7 +161,7 @@
       \vspace{10pt}
    \end{block}
    \vfill
-   \begin{block}{Project Goal}
+   \begin{block}{>> Project Goal}
       \begin{itemize}
         \item Build a controlled lab to reproduce spoofing attacks.
         \item Systematically analyze how SPF, DKIM and DMARC misconfigurations affect spoofing success and how to fix them.
@@ -170,7 +172,8 @@
 
 \subsection{Research Questions \& Contributions}
 \begin{frame}{Research Questions \& Contributions}
-    \begin{block}{Preliminary Studies}
+  \transdissolve
+  \begin{block}{>> Preliminary Studies}
         \begin{itemize}
             \item Under which SPF, DKIM and DMARC configurations does spoofing still succeed?
             \item How do protocol composition flaws (e.g., relaxed alignment, parser inconsistencies) impact authentication?
@@ -178,7 +181,7 @@
         \end{itemize}
     \end{block}
     \vspace{0.4cm}
-    \begin{block}{Development Contributions}
+    \begin{block}{>> Development Contributions}
         \begin{itemize}
             \item Docker-based lab for sender-authentication experiments.
             \item Systematic exploration of SPF/DKIM/DMARC misconfigurations.
@@ -189,9 +192,10 @@
 
 \subsection{Experimental Workflow}
 \begin{frame}{Experimental Workflow}
+  \transdissolve
   \begin{columns}[T]
     \column{0.5\textwidth}
-    \begin{block}{Project Development}
+    \begin{block}{>> Project Development}
       \begin{itemize}
         \item Infrastructure setup: Docker, BIND, Postfix/Dovecot, webmail.
         \item Authentication baseline: SPF, DKIM, DMARC behaviour.
@@ -202,22 +206,26 @@
       \end{itemize}
     \end{block}
     \column{0.49\textwidth}
-      \centering
+	  	\vspace{-20pt}      
+      	\centering
         \begin{figure}
             \centering
             \includegraphics[width=0.4\linewidth]{workflow.png}
         \end{figure}
-        \vspace{10pt}
   \end{columns}
 \end{frame}
 
 \subsection{Development Highlighs}
-\begin{frame}[fragile]{Development Highlights: \texttt{spoofmaster}}
-  \begin{itemize}
-    \item Helper tool to orchestrate spoofing tests inside the lab.
-    \item Wraps \texttt{attack.sh} script using \texttt{swaks} - aka. Swiss Army Knife.
-    \item Produces artefacts later used for ML-based detection.
-  \end{itemize}
+\begin{frame}[fragile]{Development Highlights}
+  \transdissolve
+  \begin{block}{>> \texttt{SpoofMaster}}
+  	\begin{itemize}
+   	 	\item Helper tool to orchestrate spoofing tests inside the lab.
+    		\item Wraps \texttt{attack.sh} script using \texttt{swaks} - aka. Swiss Army Knife.
+    		\item Produces artefacts later used for ML-based detection.
+  	\end{itemize}
+  \end{block}
+  \vfill
   \begin{minted}{bash}
    _____  ___    ___   ___  ____  __  __  ___   _____ ______________ ____
   / ____||  _ \ / _ \ / _ \| ___||  \/  |/ _ \ / ____|_   __|  ____||  _ \
@@ -232,8 +240,10 @@
 
 \subsection{Lab Architecture}
 \begin{frame}{Lab Architecture}
+  \transdissolve
   \begin{columns}[T]
     \column{0.55\textwidth}
+      \begin{block}{>> Lab Docker Network Setup}
       \begin{itemize}
         \item Isolated Docker network with four main containers:
         \begin{itemize}
@@ -244,6 +254,7 @@
         \end{itemize}
         \item No connectivity to the real Internet to keep attacks contained.
       \end{itemize}
+    \end{block}
     \column{0.45\textwidth}
       \begin{figure}
         \centering
@@ -258,40 +269,47 @@
 % =========================
 \subsection{SPF, DKIM and DMARC}
 \begin{frame}{SPF, DKIM and DMARC Overview}
-  \textbf{Roles}
+  \transdissolve
+  \begin{block}{>> Roles} 
   \begin{itemize}
     \item SPF validates the sending IP against the domain in the SMTP envelope (\texttt{MAIL FROM}).
     \item DKIM attaches a cryptographic signature that covers selected headers and body.
-    \item DMARC combines SPF/DKIM results and enforces domain alignment and policy.
-  \end{itemize}
-
-  \vspace{0.4cm}
-  \textbf{Key Insight}
+    \item DMARC combines SPF/DKIM results and enforces domain alignment and policy. 
+  \end{itemize} \vspace{10pt}
+  \end{block}
+  \vfill
+  \begin{block}{>> Insight}
   \begin{itemize}
     \item Authentication does not automatically mean security: misconfiguration or weak policies can still allow spoofed messages to be delivered.
-  \end{itemize}
+  \end{itemize} \vspace{10pt}
+  \end{block}
 \end{frame}
 
 \subsection{Potential Misconfigurations}
-\begin{frame}{Where Misconfigurations Appear}
+\begin{frame}[fragile]{Where Misconfigurations Appear}
+  \transdissolve
   \begin{columns}[T]
-    \column{0.55\textwidth}
-      \textbf{Examples from the Lab}
+    \column{0.40\textwidth}
+      \begin{block}{>> Examples from the Lab}
       \begin{itemize}
         \item SPF: \verb|v=spf1 mx ~all| (soft-fail, accepts suspicious senders).
         \item DKIM: selector not published or key mismatch.
         \item DMARC: \verb|v=DMARC1; p=none; aspf=r; adkim=r| (monitoring only, relaxed alignment).
       \end{itemize}
-
-      \vspace{0.3cm}
-      \textbf{Impact}
+      \end{block}
+    \column{0.60\textwidth}
+    \vspace{5pt}
+    	\begin{figure}[H]
+      \centering
+      \includegraphics[width=\textwidth]{misconfiguration_highlights.png}
+      \caption{Image from Chen et al. 2020}
+    \end{figure}
+    \begin{block}{>> Impact}
       \begin{itemize}
         \item Suspicious mail is accepted or only logged.
         \item Spoofed visible identities are not blocked.
       \end{itemize}
-    \column{0.45\textwidth}
-      \centering
-      {\small[Diagram: DNS records vs. MTA configuration vs. headers]}
+     \end{block}
   \end{columns}
 \end{frame}
 
@@ -300,45 +318,50 @@
 % ====================
 
 \subsection{Spoofing with SPF only}
-\begin{frame}{SPF-Based Spoofing Scenario}
-  \textbf{Attack Setup}
+\begin{frame}[fragile]{SPF-Based Spoofing Scenario}
+  \transdissolve
+  \begin{block}{>> Setup}
   \begin{itemize}
     \item SPF configured with soft-fail (\verb|~all|) and permissive host entries.
     \item Attacker sends mail using \texttt{swaks} with:
       \begin{itemize}
         \item Envelope sender: \texttt{attacker@attacker.test}.
         \item Visible \texttt{From:} header: \texttt{Alice <alice@victim.test>}.
-      \end{itemize}
+      \end{itemize} \vspace{10pt}
   \end{itemize}
-
-  \vspace{0.4cm}
-  \textbf{Observation}
+  \end{block}
+  \vfill
+  \begin{block}{>> Observation}
   \begin{itemize}
     \item SPF can pass because the envelope sender is allowed.
     \item The user still sees a spoofed identity in the visible \texttt{From} header.
-  \end{itemize}
+  \end{itemize} \vspace{10pt}
+  \end{block}
 \end{frame}
 
 \subsection{Open Source Email Spoofer Tool}
 \begin{frame}{Advanced Authentication Bypass (\texttt{espoofer})}
-  \textbf{Attack Goal}
+  \transdissolve
+  \begin{block}{>> Attack Goal}
   \begin{itemize}
     \item Exploit composition flaws and parser inconsistencies to bypass SPF, DKIM and DMARC simultaneously.
   \end{itemize}
-
-  \vspace{0.3cm}
-  \textbf{Techniques}
+  \end{block}
+  \vfill
+  \begin{block}{>> Techniques}
   \begin{itemize}
     \item Carefully crafting multiple \texttt{From} headers.
     \item Taking advantage of relaxed alignment and inconsistent header parsing.
     \item Using Espoofer to automate complex SMTP interactions.
   \end{itemize}
+  \end{block}
 
-  \vspace{0.3cm}
-  \textbf{Result}
+  \vfill
+  \begin{block}{>> Result}
   \begin{itemize}
     \item Spoofed emails can still be delivered even though all three mechanisms appear to be deployed.
   \end{itemize}
+  \end{block}
 \end{frame}
 
 % ==========================
@@ -347,37 +370,41 @@
 
 \subsection{SMTP Artefact Analysis}
 \begin{frame}{SMTP Artefact Analysis}
-  \textbf{Collected Artefacts}
+  \transdissolve
+  \begin{block}{>> Collected Artefacts}
   \begin{itemize}
     \item Authentication-Results headers (SPF, DKIM, DMARC outcomes).
     \item Mail logs from the victim mail server and DNS logs from BIND.
     \item Header anomalies (multiple \texttt{From}, inconsistent domains).
   \end{itemize}
-
-  \vspace{0.4cm}
-  \textbf{Purpose}
+  \end{block}
+  \vfill
+  \begin{block}{>> Purpose}
   \begin{itemize}
     \item Understand why specific messages pass or fail authentication
           (e.g., DKIM selector not found vs. signature mismatch).
     \item Transform artefacts into features for ML-based detection.
   \end{itemize}
+  \end{block}
 \end{frame}
 
 \subsection{ML Espoofing Detector}
 \begin{frame}{ML-Based Spoofing Detection}
-  \textbf{Feature Engineering}
+  \transdissolve
+  \begin{block}{>> Feature Engineering}
   \begin{itemize}
     \item Authentication outcomes (SPF, DKIM, DMARC).
     \item Domain alignment indicators (match/mismatch).
     \item Header and path anomalies derived from SMTP traces.
   \end{itemize}
-
-  \vspace{0.4cm}
-  \textbf{Classifier Role}
+  \end{block}
+  \vfill
+  \begin{block}{>> Classifier Role}
   \begin{itemize}
     \item Distinguish legitimate vs. spoofed emails even under weak policies.
     \item Act as a final defensive layer when protocol-level checks are bypassed.
   \end{itemize}
+  \end{block}
 \end{frame}
 
 % =========================
@@ -385,57 +412,64 @@
 % =========================
 
 \subsection{Authentication Hardening}
-\begin{frame}{Infrastructure Hardening}
+\begin{frame}[fragile]{Infrastructure Hardening}
+  \transdissolve
   \begin{columns}[T]
     \column{0.5\textwidth}
-      \textbf{Before (Vulnerable)}
+      \begin{block}{>> Before (Vulnerable)}
       \begin{itemize}
         \item SPF: soft-fail, permissive includes.
         \item DKIM: keys not published or misconfigured.
         \item DMARC: policy \texttt{p=none}, relaxed alignment.
       \end{itemize}
+      \end{block}
     \column{0.5\textwidth}
-      \textbf{After (Hardened)}
+      \begin{block}{>> After (Hardened)}
       \begin{itemize}
         \item SPF: strict \verb|-all| and limited authorized hosts.
         \item DKIM: properly published selector and validated key.
         \item DMARC: \verb|p=reject| with strict alignment for SPF and DKIM.
       \end{itemize}
+      \end{block}
   \end{columns}
 \end{frame}
 
 \subsection{Results}
 \begin{frame}{Experimental Results}
-  \textbf{Spoofing Success vs. Configuration}
+  \transdissolve
+  \begin{block}{>> Spoofing Success vs. Configuration}
   \begin{itemize}
     \item No authentication or very weak policies: attacks consistently succeed.
     \item SPF-only or DMARC with monitoring: many spoofed emails still delivered.
     \item Fully hardened SPF/DKIM/DMARC: tested attacks are blocked or flagged by ML.
   \end{itemize}
-
-  \vspace{0.4cm}
-  \textbf{Key Observation}
+  \end{block}
+  \vfill
+  \begin{block}{>> Key Observation}
   \begin{itemize}
     \item Defence-in-depth and correct protocol composition are required; each mechanism alone is insufficient.
   \end{itemize}
+  \end{block}
 \end{frame}
 
 \subsection{Conclusions \& Future Work}
 \begin{frame}{Conclusions \& Future Work}
-  \textbf{Key Lessons}
+  \transdissolve
+  \begin{block}{>> Key Lessons}
   \begin{itemize}
     \item Misconfiguration and weak composition of SPF, DKIM and DMARC make spoofing feasible.
     \item Reproducible infrastructure allows safe experimentation and clear hardening guidelines.
     \item ML-based detection complements protocol-level authentication.
   \end{itemize}
-
-  \vspace{0.4cm}
-  \textbf{Future Work}
+  \end{block}
+  \vfill
+  \begin{block}{>> Future Work}
   \begin{itemize}
     \item Extend the lab with more diverse real-world configurations and datasets.
     \item Refine DKIM/DMARC handling and detection features.
     \item Explore usability aspects and deployment recommendations.
   \end{itemize}
+  \end{block}
 \end{frame}
 
 % =============
@@ -443,9 +477,10 @@
 % =============
 
 \begin{frame}[allowframebreaks]{References}
-\nocite{*}
-\bibliographystyle{IEEEtran}
-\bibliography{references}
+  \transdissolve
+  	\nocite{*}
+	\bibliographystyle{IEEEtran}
+	\bibliography{OurBibliography}
 \end{frame}
 
 \end{document}
