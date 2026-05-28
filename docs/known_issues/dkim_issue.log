@@ -1,0 +1,128 @@
+docker exec victim-mail-10.9.0.6 tcpdump -i any -n -v port 25 or port 53
+tcpdump: data link type LINUX_SLL2
+tcpdump: listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+22:23:18.873277 eth0  In  IP (tos 0x0, ttl 64, id 44844, offset 0, flags [DF], proto TCP (6), length 60)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [S], cksum 0x144d (incorrect -> 0x6e26), seq 1409758950, win 64240, options [mss 1460,sackOK,TS val 2926365110 ecr 0,nop,wscale 7], length 0
+22:23:18.873292 eth0  Out IP (tos 0x0, ttl 64, id 0, offset 0, flags [DF], proto TCP (6), length 60)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [S.], cksum 0x144d (incorrect -> 0x338d), seq 1495903663, ack 1409758951, win 65160, options [mss 1460,sackOK,TS val 106047941 ecr 2926365110,nop,wscale 7], length 0
+22:23:18.873309 eth0  In  IP (tos 0x0, ttl 64, id 44845, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [.], cksum 0x1445 (incorrect -> 0x5eec), ack 1, win 502, options [nop,nop,TS val 2926365110 ecr 106047941], length 0
+22:23:18.887263 eth0  Out IP (tos 0x0, ttl 64, id 572, offset 0, flags [DF], proto TCP (6), length 80)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [P.], cksum 0x1461 (incorrect -> 0xef4c), seq 1:29, ack 1, win 510, options [nop,nop,TS val 106047955 ecr 2926365110], length 28: SMTP, length: 28
+	220-mail.victim.test ESMTP
+22:23:18.887306 eth0  In  IP (tos 0x0, ttl 64, id 44846, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [.], cksum 0x1445 (incorrect -> 0x5eb4), ack 29, win 502, options [nop,nop,TS val 2926365124 ecr 106047955], length 0
+22:23:24.936976 eth0  Out IP (tos 0x0, ttl 64, id 37937, offset 0, flags [DF], proto UDP (17), length 67)
+    10.9.0.6.32905 > 10.9.0.5.53: 45193+ PTR? 7.0.9.10.in-addr.arpa. (39)
+22:23:24.956509 eth0  In  IP (tos 0x0, ttl 64, id 13159, offset 0, flags [none], proto UDP (17), length 67)
+    10.9.0.5.53 > 10.9.0.6.32905: 45193 NXDomain 0/0/0 (39)
+22:23:24.984288 eth0  Out IP (tos 0x0, ttl 64, id 573, offset 0, flags [DF], proto TCP (6), length 80)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [P.], cksum 0x1461 (incorrect -> 0xd75e), seq 29:57, ack 1, win 510, options [nop,nop,TS val 106054052 ecr 2926365124], length 28: SMTP, length: 28
+	220 mail.victim.test ESMTP
+22:23:24.984453 eth0  In  IP (tos 0x0, ttl 64, id 44847, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [.], cksum 0x1445 (incorrect -> 0x2ef6), ack 57, win 502, options [nop,nop,TS val 2926371221 ecr 106054052], length 0
+22:23:24.985940 eth0  In  IP (tos 0x0, ttl 64, id 44848, offset 0, flags [DF], proto TCP (6), length 77)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [P.], cksum 0x145e (incorrect -> 0xfe8d), seq 1:26, ack 57, win 502, options [nop,nop,TS val 2926371223 ecr 106054052], length 25: SMTP, length: 25
+	EHLO mail.attacker.test
+22:23:24.986930 eth0  Out IP (tos 0x0, ttl 64, id 574, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [.], cksum 0x1445 (incorrect -> 0x2ed0), ack 26, win 510, options [nop,nop,TS val 106054055 ecr 2926371223], length 0
+22:23:24.988708 eth0  Out IP (tos 0x0, ttl 64, id 575, offset 0, flags [DF], proto TCP (6), length 172)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [P.], cksum 0x14bd (incorrect -> 0x3bc0), seq 57:177, ack 26, win 510, options [nop,nop,TS val 106054057 ecr 2926371223], length 120: SMTP, length: 120
+	250-mail.victim.test
+	250-PIPELINING
+	250-SIZE 10240000
+	250-ETRN
+	250-ENHANCEDSTATUSCODES
+	250-8BITMIME
+	250 CHUNKING
+22:23:24.990989 eth0  In  IP (tos 0x0, ttl 64, id 44849, offset 0, flags [DF], proto TCP (6), length 86)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [P.], cksum 0x1467 (incorrect -> 0x8f77), seq 26:60, ack 177, win 502, options [nop,nop,TS val 2926371228 ecr 106054057], length 34: SMTP, length: 34
+	MAIL FROM:<attacker@victim.test>
+22:23:25.007602 eth0  Out IP (tos 0x0, ttl 64, id 576, offset 0, flags [DF], proto TCP (6), length 66)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [P.], cksum 0x1453 (incorrect -> 0xdbbf), seq 177:191, ack 60, win 510, options [nop,nop,TS val 106054075 ecr 2926371228], length 14: SMTP, length: 14
+	250 2.1.0 Ok
+22:23:25.008752 eth0  In  IP (tos 0x0, ttl 64, id 44850, offset 0, flags [DF], proto TCP (6), length 79)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [P.], cksum 0x1460 (incorrect -> 0xb49e), seq 60:87, ack 191, win 502, options [nop,nop,TS val 2926371246 ecr 106054075], length 27: SMTP, length: 27
+	RCPT TO:<bob@victim.test>
+22:23:25.051856 eth0  Out IP (tos 0x0, ttl 64, id 577, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [.], cksum 0x1445 (incorrect -> 0x2db5), ack 87, win 510, options [nop,nop,TS val 106054120 ecr 2926371246], length 0
+22:23:25.125994 eth0  Out IP (tos 0x0, ttl 64, id 57368, offset 0, flags [DF], proto UDP (17), length 64)
+    10.9.0.6.59937 > 10.9.0.5.53: 26456+ TXT? mail.attacker.test. (36)
+22:23:25.126118 eth0  In  IP (tos 0x0, ttl 64, id 13181, offset 0, flags [none], proto UDP (17), length 110)
+    10.9.0.5.53 > 10.9.0.6.59937: 26456* 0/1/0 (82)
+22:23:25.127218 eth0  Out IP (tos 0x0, ttl 64, id 57369, offset 0, flags [DF], proto UDP (17), length 57)
+    10.9.0.6.54403 > 10.9.0.5.53: 55276+ TXT? victim.test. (29)
+22:23:25.127306 eth0  In  IP (tos 0x0, ttl 64, id 13182, offset 0, flags [none], proto UDP (17), length 103)
+    10.9.0.5.53 > 10.9.0.6.54403: 55276* 0/1/0 (75)
+22:23:25.147482 eth0  Out IP (tos 0x0, ttl 64, id 578, offset 0, flags [DF], proto TCP (6), length 66)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [P.], cksum 0x1453 (incorrect -> 0xd5f8), seq 191:205, ack 87, win 510, options [nop,nop,TS val 106054215 ecr 2926371246], length 14: SMTP, length: 14
+	250 2.1.5 Ok
+22:23:25.148074 eth0  In  IP (tos 0x0, ttl 64, id 44851, offset 0, flags [DF], proto TCP (6), length 58)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [P.], cksum 0x144b (incorrect -> 0x872a), seq 87:93, ack 205, win 502, options [nop,nop,TS val 2926371385 ecr 106054215], length 6: SMTP, length: 6
+	DATA
+22:23:25.148090 eth0  Out IP (tos 0x0, ttl 64, id 579, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [.], cksum 0x1445 (incorrect -> 0x2cb6), ack 93, win 510, options [nop,nop,TS val 106054216 ecr 2926371385], length 0
+22:23:25.149637 eth0  Out IP (tos 0x0, ttl 64, id 580, offset 0, flags [DF], proto TCP (6), length 89)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [P.], cksum 0x146a (incorrect -> 0xfbaa), seq 205:242, ack 93, win 510, options [nop,nop,TS val 106054217 ecr 2926371385], length 37: SMTP, length: 37
+	354 End data with <CR><LF>.<CR><LF>
+22:23:25.150126 eth0  In  IP (tos 0x0, ttl 64, id 44852, offset 0, flags [DF], proto TCP (6), length 405)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [P.], cksum 0x15a6 (incorrect -> 0x50fb), seq 93:446, ack 242, win 502, options [nop,nop,TS val 2926371387 ecr 106054217], length 353: SMTP, length: 353
+	Date: Wed, 27 May 2026 22:23:18 +0000
+	To: bob@victim.test
+	From: alice@victim.test
+	Subject: DKIM Test
+	Message-Id: <20260527222318.008461@attacker>
+	X-Mailer: swaks v20190914.0 jetmore.org/john/code/swaks/
+	DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=victim.test; s=mail; h=from:to:subject; bh=invalidhash; b=invaliddata
+	
+	Hello!
+	
+	
+	.
+22:23:25.191722 eth0  Out IP (tos 0x0, ttl 64, id 581, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [.], cksum 0x1445 (incorrect -> 0x2b04), ack 446, win 508, options [nop,nop,TS val 106054260 ecr 2926371387], length 0
+22:23:25.254805 eth0  Out IP (tos 0x0, ttl 64, id 41386, offset 0, flags [DF], proto UDP (17), length 75)
+    10.9.0.6.34490 > 10.9.0.5.53: 57458+ [1au] TXT? _dmarc.victim.test. (47)
+22:23:25.255450 eth0  In  IP (tos 0x0, ttl 64, id 13208, offset 0, flags [none], proto UDP (17), length 121)
+    10.9.0.5.53 > 10.9.0.6.34490: 57458* 0/1/1 (93)
+22:23:25.256018 eth0  Out IP (tos 0x0, ttl 64, id 52936, offset 0, flags [DF], proto UDP (17), length 75)
+    10.9.0.6.35568 > 10.9.0.5.53: 21105+ [1au] TXT? _dmarc.victim.test. (47)
+22:23:25.256435 eth0  In  IP (tos 0x0, ttl 64, id 13209, offset 0, flags [none], proto UDP (17), length 121)
+    10.9.0.5.53 > 10.9.0.6.35568: 21105* 0/1/1 (93)
+22:23:25.330387 eth0  Out IP (tos 0x0, ttl 64, id 582, offset 0, flags [DF], proto TCP (6), length 89)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [P.], cksum 0x146a (incorrect -> 0x7cf0), seq 242:279, ack 446, win 508, options [nop,nop,TS val 106054398 ecr 2926371387], length 37: SMTP, length: 37
+	250 2.0.0 Ok: queued as 23F6C30A8C1
+22:23:25.336319 eth0  In  IP (tos 0x0, ttl 64, id 44853, offset 0, flags [DF], proto TCP (6), length 58)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [P.], cksum 0x144b (incorrect -> 0x81df), seq 446:452, ack 279, win 502, options [nop,nop,TS val 2926371573 ecr 106054398], length 6: SMTP, length: 6
+	QUIT
+22:23:25.336373 eth0  Out IP (tos 0x0, ttl 64, id 583, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [.], cksum 0x1445 (incorrect -> 0x298f), ack 452, win 508, options [nop,nop,TS val 106054404 ecr 2926371573], length 0
+22:23:25.340965 eth0  Out IP (tos 0x0, ttl 64, id 584, offset 0, flags [DF], proto TCP (6), length 67)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [P.], cksum 0x1454 (incorrect -> 0x821d), seq 279:294, ack 452, win 508, options [nop,nop,TS val 106054409 ecr 2926371573], length 15: SMTP, length: 15
+	221 2.0.0 Bye
+22:23:25.341051 eth0  Out IP (tos 0x0, ttl 64, id 585, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [F.], cksum 0x1445 (incorrect -> 0x297a), seq 294, ack 452, win 508, options [nop,nop,TS val 106054409 ecr 2926371573], length 0
+22:23:25.345720 eth0  In  IP (tos 0x0, ttl 64, id 44854, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.7.51104 > 10.9.0.6.25: Flags [F.], cksum 0x1445 (incorrect -> 0x2975), seq 452, ack 295, win 502, options [nop,nop,TS val 2926371583 ecr 106054409], length 0
+22:23:25.345747 eth0  Out IP (tos 0x0, ttl 64, id 586, offset 0, flags [DF], proto TCP (6), length 52)
+    10.9.0.6.25 > 10.9.0.7.51104: Flags [.], cksum 0x1445 (incorrect -> 0x296a), ack 453, win 508, options [nop,nop,TS val 106054414 ecr 2926371583], length 0
+22:23:25.485989 eth0  Out IP (tos 0x0, ttl 64, id 4550, offset 0, flags [DF], proto UDP (17), length 68)
+    10.9.0.6.34476 > 10.9.0.5.53: 49208+ [1au] A? victim.test. (40)
+22:23:25.486151 eth0  In  IP (tos 0x0, ttl 64, id 13223, offset 0, flags [none], proto UDP (17), length 114)
+    10.9.0.5.53 > 10.9.0.6.34476: 49208* 0/1/1 (86)
+22:23:25.486715 eth0  Out IP (tos 0x0, ttl 64, id 4551, offset 0, flags [DF], proto UDP (17), length 68)
+    10.9.0.6.34476 > 10.9.0.5.53: 64271+ [1au] MX? victim.test. (40)
+22:23:25.486800 eth0  In  IP (tos 0x0, ttl 64, id 13224, offset 0, flags [none], proto UDP (17), length 105)
+    10.9.0.5.53 > 10.9.0.6.34476: 64271* 1/0/2 victim.test. MX mail.victim.test. 10 (77)
+22:23:25.488143 eth0  Out IP (tos 0x0, ttl 64, id 4552, offset 0, flags [DF], proto UDP (17), length 81)
+    10.9.0.6.34476 > 10.9.0.5.53: 7605+ [1au] A? victim.test.fresh.fmb.la. (53)
+22:23:25.489042 eth0  Out IP (tos 0x0, ttl 64, id 4553, offset 0, flags [DF], proto UDP (17), length 68)
+    10.9.0.6.34476 > 10.9.0.5.53: 59028+ [1au] TXT? victim.test. (40)
+22:23:25.489139 eth0  In  IP (tos 0x0, ttl 64, id 13225, offset 0, flags [none], proto UDP (17), length 114)
+    10.9.0.5.53 > 10.9.0.6.34476: 59028* 0/1/1 (86)
+22:23:25.497207 eth0  Out IP (tos 0x0, ttl 64, id 4554, offset 0, flags [DF], proto UDP (17), length 84)
+    10.9.0.6.34476 > 10.9.0.5.53: 10038+ [1au] TXT? mail._domainkey.victim.test. (56)
+22:23:25.497355 eth0  In  IP (tos 0x0, ttl 64, id 13226, offset 0, flags [none], proto UDP (17), length 519)
+    10.9.0.5.53 > 10.9.0.6.34476: 10038* 1/0/1 mail._domainkey.victim.test. TXT "v=DKIM1; h=sha256; k=rsa; " "p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA059zD3d0ILQl44l8phURf6ZYYehEHdBZZWhcFtifuqrQkYBYLkQDi1lkTJgsz9BQkhvJ8MyPitBDG0uhRMJ8TG+ykJTj3NuygTYbwRCXiPwMWH+vnopZZfopsVzv38hL23rs919UNgaQ6fFdZAHAJlxFP4VnDwc9HANKlh/lVaZSWVaIRLo0ZJbaLMvTmRtZosysdcjgjwF6B9" "qW/4AY+6AsCVSk98xCC2X/5Hz7DPoyvjLUklormB93lNasvtO1O4L89jgYCGVDVYK6/95C+7F/augNqoId2EwC4Fc3ElbiZpVrW7Hm4Y9tqYTPNl9zq5mFgZBvTAD93lgMlA8YVQIDAQAB" (491)
+22:23:25.500904 eth0  Out IP (tos 0x0, ttl 64, id 4555, offset 0, flags [DF], proto UDP (17), length 85)
+    10.9.0.6.34476 > 10.9.0.5.53: 20471+ [1au] TXT? _adsp._domainkey.victim.t

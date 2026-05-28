@@ -1,0 +1,22 @@
+docker exec victim-mail-10.9.0.6 postconf dkim_milter 
+dkim_milter = inet:localhost:8891
+[05/27/26]seed@VM:~$ docker exec victim-mail-10.9.0.6 grep -i socket /etc/opendkim.conf 
+Socket                  inet:8891@localhost
+[05/27/26]seed@VM:~$ docker exec victim-mail-10.9.0.6 postconf milter_default_action
+milter_default_action = accept
+[05/27/26]seed@VM:~$ docker exec victim-mail-10.9.0.6 grep -i opendkim /var/log/mail/mail.log 2>/dev/null || \ 
+2026-05-27T20:11:19.382723+00:00 mail opendkim[624]: OpenDKIM Filter v2.11.0 starting (args: -f)
+2026-05-27T22:23:25.193952+00:00 mail opendkim[624]: 23F6C30A8C1: [10.9.0.7] [10.9.0.7] not internal
+2026-05-27T22:23:25.193972+00:00 mail opendkim[624]: 23F6C30A8C1: not authenticated
+2026-05-27T22:23:25.206332+00:00 mail opendkim[624]: 23F6C30A8C1: signature=invalidd domain=victim.test selector=mail result="key not found in DNS"
+2026-05-27T22:23:25.206393+00:00 mail opendkim[624]: 23F6C30A8C1: key retrieval failed (s=mail, d=victim.test): 'mail._domainkey.victim.test' record not found
+[05/27/26]seed@VM:~$ docker exec victim-mail-10.9.0.6 grep -i dkim /var/log/mail.log 2>/dev/null || \ 
+2026-05-27T20:11:19.382723+00:00 mail opendkim[624]: OpenDKIM Filter v2.11.0 starting (args: -f)
+2026-05-27T22:23:25.193952+00:00 mail opendkim[624]: 23F6C30A8C1: [10.9.0.7] [10.9.0.7] not internal
+2026-05-27T22:23:25.193972+00:00 mail opendkim[624]: 23F6C30A8C1: not authenticated
+2026-05-27T22:23:25.206332+00:00 mail opendkim[624]: 23F6C30A8C1: signature=invalidd domain=victim.test selector=mail result="key not found in DNS"
+2026-05-27T22:23:25.206393+00:00 mail opendkim[624]: 23F6C30A8C1: key retrieval failed (s=mail, d=victim.test): 'mail._domainkey.victim.test' record not found
+[05/27/26]seed@VM:~$ docker exec victim-mail-10.9.0.6 journalctl -u opendkim --no-pager -n 30  2>/dev/null
+OCI runtime exec failed: exec failed: unable to start container process: exec: "journalctl": executable file not found in $PATH: unknown
+[05/27/26]seed@VM:~$ docker exec victim-mail-10.9.0.6 journalctl -u opendkim --no-pager -n 30
+OCI runtime exec failed: exec failed: unable to start container process: exec: "journalctl": executable file not found in $PATH: unknown
